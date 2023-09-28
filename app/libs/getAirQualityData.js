@@ -1,6 +1,9 @@
 export const getAllStations = async () => {
   const res = await fetch(
-    'https://api.gios.gov.pl/pjp-api/rest/station/findAll'
+    'https://api.gios.gov.pl/pjp-api/rest/station/findAll',
+    {
+      cache: 'no-store',
+    }
   );
   const stations = await res.json();
 
