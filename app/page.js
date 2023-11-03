@@ -6,7 +6,6 @@ import {
   getSensorID,
   getStationsID,
   getSensorData,
-  getSingleStationAQI,
 } from './lib/getAirQualityData';
 
 export const dynamic = 'force-dynamic';

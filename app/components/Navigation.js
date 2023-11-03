@@ -4,41 +4,42 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 export const Navigation = ({ clickedStationAQI, sensorData }) => {
-  const [AQItxt, setAQItxt] = useState();
+  const [AQItxt, setAQItxt] = useState('');
 
   useEffect(() => {
-    let AQItxt = '';
     if (clickedStationAQI === '-1') {
-      return (AQItxt = 'Brak indeksu');
+      setAQItxt('Brak indeksu');
     } else if (clickedStationAQI !== null) {
+      const helperTxt = 'jakość powietrza';
       switch (clickedStationAQI) {
         case '0':
-          setAQItxt('Bardzo dobra');
+          setAQItxt(`Bardzo dobra ${helperTxt}`);
           break;
         case '1':
-          setAQItxt('Dobra')
+          setAQItxt(`Dobra ${helperTxt}`);
           break;
         case '2':
-          setAQItxt('Umiarkowana')
+          setAQItxt(`Umiarkowania ${helperTxt}`);
           break;
         case '3':
-          setAQItxt('Dostateczna')
+          setAQItxt(`Dostateczna ${helperTxt}`);
           break;
         case '4':
-          setAQItxt('Zła')
+          setAQItxt(`Zła ${helperTxt}`);
           break;
         case '5':
-          setAQItxt('Bardzo zła')
+          setAQItxt(`Bardzo zła ${helperTxt}`);
           break;
-        default:
-          'Brak indeksu';
-        }
+        // default:
+        //   setAQItxt('');
+      }
     }
-  
+
     // return cleanUp = () => {
-      
+
     // }
-  }, [AQItxt]);
+  }, [clickedStationAQI]);
+
   // const AQIChecker = () => {
   //   let AQItxt = '';
   //   if (clickedStationAQI === '-1') {
@@ -115,7 +116,7 @@ export const Navigation = ({ clickedStationAQI, sensorData }) => {
           return (
             <ul className='text-xl'>
               <li key={key}>
-                {/* <p>Pomiar z godziny: {latestDate.slice(-8, -3)}</p> */}
+                <p>Pomiar z godziny: {latestDate.slice(-8, -3)}</p>
                 <div className='mb-1'>
                   {supHandler(key)}:{' '}
                   <div className='inline font-bold text-2xl'>
@@ -128,11 +129,12 @@ export const Navigation = ({ clickedStationAQI, sensorData }) => {
             </ul>
           );
         } else {
-          return (
-            <div key={key}>
-              <p>No data found.</p>
-            </div>
-          );
+          return 
+          // (
+          //   <div key={key}>
+          //     <p>No data found.</p>
+          //   </div>
+          // );
         }
       });
     }
