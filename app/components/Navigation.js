@@ -1,19 +1,74 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
-export const Navigation = (props) => {
-  const sensorData = props.sensorData;
-  const AQI = props.singleStationAQI;
+export const Navigation = ({ clickedStationAQI, sensorData }) => {
+  const [AQItxt, setAQItxt] = useState();
 
-  const AQIChecker = () => {
-    if (AQI === 'Brak indeksu') {
-      return AQI;
-    } else if (AQI !== null) {
-      return `${AQI.slice(0, -1) + 'a'} jakość powietrza`;
+  useEffect(() => {
+    let AQItxt = '';
+    if (clickedStationAQI === '-1') {
+      return (AQItxt = 'Brak indeksu');
+    } else if (clickedStationAQI !== null) {
+      switch (clickedStationAQI) {
+        case '0':
+          setAQItxt('Bardzo dobra');
+          break;
+        case '1':
+          setAQItxt('Dobra')
+          break;
+        case '2':
+          setAQItxt('Umiarkowana')
+          break;
+        case '3':
+          setAQItxt('Dostateczna')
+          break;
+        case '4':
+          setAQItxt('Zła')
+          break;
+        case '5':
+          setAQItxt('Bardzo zła')
+          break;
+        default:
+          'Brak indeksu';
+        }
     }
-  };
+  
+    // return cleanUp = () => {
+      
+    // }
+  }, [AQItxt]);
+  // const AQIChecker = () => {
+  //   let AQItxt = '';
+  //   if (clickedStationAQI === '-1') {
+  //     return (AQItxt = 'Brak indeksu');
+  //   } else if (clickedStationAQI !== null) {
+  //     switch (clickedStationAQI) {
+  //       case '0':
+  //         AQItxt = 'Bardzo dobra';
+  //         break;
+  //       case '1':
+  //         AQItxt = 'Dobra';
+  //         break;
+  //       case '2':
+  //         AQItxt = 'Umiarkowana';
+  //         break;
+  //       case '3':
+  //         AQItxt = 'Dostateczna';
+  //         break;
+  //       case '4':
+  //         AQItxt = 'Zła';
+  //         break;
+  //       case '5':
+  //         AQItxt = 'Bardzo zła';
+  //         break;
+  //       default:
+  //         'Brak indeksu';
+  //         return `${AQItxt} jakość powietrza`;
+  //     }
+  //   }
+  // };
 
   const order = ['PM10', 'PM2.5', 'PM1', 'NO2', 'O3', 'SO2', 'CO', 'C6H6'];
 
@@ -97,12 +152,12 @@ export const Navigation = (props) => {
             className='self-center'
           />
         )}
-        {/* {AQI === 'Brak indeksu' && (
-          <p className='mb-4 self-center'>{AQI}</p>
+        {/* {clickedStationAQI === 'Brak indeksu' && (
+          <p className='mb-4 self-center'>{clickedStationAQI}</p>
         )} */}
 
-        {/* {AQI !== null && AQI !== 'Brak indeksu' && ( */}
-        <p className='mb-4 self-center'>{AQIChecker()}</p>
+        {/* {clickedStationAQI !== null && clickedStationAQI !== 'Brak indeksu' && ( */}
+        <p className='mb-4 self-center'>{AQItxt}</p>
         {/* )} */}
         {sensorData && (
           <div className='border-[1px] border-solid border-blue2 mb-2'></div>

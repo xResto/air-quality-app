@@ -14,18 +14,18 @@ export const getAllStations = async () => {
   }
 };
 
-export const getStationsId = (stations) => {
+export const getStationsID = (stations) => {
   // const stationsId = [];
 
   // for (const station of stations) {
   //   stationsId.push(station.id);
   // }
-  const stationsId = stations.map((station) => station.id);
+  const stationsID = stations.map((station) => station.id);
 
-  return stationsId;
+  return stationsID;
 };
 
-export const getAqiData = async (stationsId) => {
+export const getAqiData = async (stationsID) => {
   // const aqi = [];
 
   // for (const stationId of stationsId) {
@@ -40,14 +40,14 @@ export const getAqiData = async (stationsId) => {
   // }
 
   // return aqi;
-  if (!stationsId) return null;
+  if (!stationsID) return null;
 
-  const aqiRequests = stationsId.map(async (stationId) => {
-    if (!stationId) return null;
+  const aqiRequests = stationsID.map(async (stationID) => {
+    if (!stationID) return null;
 
     try {
       const res = await fetch(
-        `https://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/${stationId}`,
+        `https://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/${stationID}`,
         {
           next: { revalidate: 900 },
         }
@@ -66,12 +66,12 @@ export const getAqiData = async (stationsId) => {
   return aqi;
 };
 
-export const getSingleStationAQI = async (stationId) => {
-  if (!stationId) return null;
+export const getSingleStationAQI = async (stationID) => {
+  if (!stationID) return null;
 
   try {
     const res = await fetch(
-      `https://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/${stationId}`,
+      `https://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/${stationID}`,
       {
         cache: 'no-store',
       }
@@ -79,20 +79,20 @@ export const getSingleStationAQI = async (stationId) => {
 
     const data = await res.json();
 
-    const singleStationAqiId = data.stIndexLevel.indexLevelName;
+    const singleStationAqiID = data.stIndexLevel.indexLevelName;
 
-    return singleStationAqiId;
+    return singleStationAqiID;
   } catch (reason) {
     return null;
   }
 };
 
-export const getSensorId = async (stationId) => {
-  if (!stationId) return null;
+export const getSensorID = async (stationID) => {
+  if (!stationID) return null;
 
   try {
     const res = await fetch(
-      `https://api.gios.gov.pl/pjp-api/rest/station/sensors/${stationId}`,
+      `https://api.gios.gov.pl/pjp-api/rest/station/sensors/${stationID}`,
       {
         cache: 'no-store',
       }
@@ -100,21 +100,21 @@ export const getSensorId = async (stationId) => {
 
     const data = await res.json();
 
-    const sensorsId = data.map((data) => data.id);
+    const sensorsID = data.map((data) => data.id);
 
-    return sensorsId;
+    return sensorsID;
   } catch (reason) {
     return null;
   }
 };
 
-export const getSensorData = async (sensorIds) => {
-  if (!sensorIds) return null;
+export const getSensorData = async (sensorIDs) => {
+  if (!sensorIDs) return null;
 
-  const sensorDataRequests = sensorIds.map(async (sensorId) => {
+  const sensorDataRequests = sensorIDs.map(async (sensorID) => {
     try {
       const res = await fetch(
-        `https://api.gios.gov.pl/pjp-api/rest/data/getData/${sensorId}`,
+        `https://api.gios.gov.pl/pjp-api/rest/data/getData/${sensorID}`,
         {
           cache: 'no-store',
         }
