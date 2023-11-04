@@ -30,8 +30,6 @@ export const Navigation = ({ clickedStationAQI, sensorData }) => {
         case '5':
           setAQItxt(`Bardzo zła ${helperTxt}`);
           break;
-        // default:
-        //   setAQItxt('');
       }
     }
 
@@ -39,37 +37,6 @@ export const Navigation = ({ clickedStationAQI, sensorData }) => {
 
     // }
   }, [clickedStationAQI]);
-
-  // const AQIChecker = () => {
-  //   let AQItxt = '';
-  //   if (clickedStationAQI === '-1') {
-  //     return (AQItxt = 'Brak indeksu');
-  //   } else if (clickedStationAQI !== null) {
-  //     switch (clickedStationAQI) {
-  //       case '0':
-  //         AQItxt = 'Bardzo dobra';
-  //         break;
-  //       case '1':
-  //         AQItxt = 'Dobra';
-  //         break;
-  //       case '2':
-  //         AQItxt = 'Umiarkowana';
-  //         break;
-  //       case '3':
-  //         AQItxt = 'Dostateczna';
-  //         break;
-  //       case '4':
-  //         AQItxt = 'Zła';
-  //         break;
-  //       case '5':
-  //         AQItxt = 'Bardzo zła';
-  //         break;
-  //       default:
-  //         'Brak indeksu';
-  //         return `${AQItxt} jakość powietrza`;
-  //     }
-  //   }
-  // };
 
   const order = ['PM10', 'PM2.5', 'PM1', 'NO2', 'O3', 'SO2', 'CO', 'C6H6'];
 
@@ -129,7 +96,7 @@ export const Navigation = ({ clickedStationAQI, sensorData }) => {
             </ul>
           );
         } else {
-          return 
+          return;
           // (
           //   <div key={key}>
           //     <p>No data found.</p>
@@ -154,13 +121,8 @@ export const Navigation = ({ clickedStationAQI, sensorData }) => {
             className='self-center'
           />
         )}
-        {/* {clickedStationAQI === 'Brak indeksu' && (
-          <p className='mb-4 self-center'>{clickedStationAQI}</p>
-        )} */}
 
-        {/* {clickedStationAQI !== null && clickedStationAQI !== 'Brak indeksu' && ( */}
         <p className='mb-4 self-center'>{AQItxt}</p>
-        {/* )} */}
         {sensorData && (
           <div className='border-[1px] border-solid border-blue2 mb-2'></div>
         )}

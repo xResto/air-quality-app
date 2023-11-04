@@ -47,26 +47,26 @@ export const getAqiData = async (stationsID) => {
   return aqi;
 };
 
-// export const getSingleStationAQI = async (stationID) => {
-//   if (!stationID) return null;
+export const getSingleStationAQI = async (stationID) => {
+  if (!stationID) return null;
 
-//   try {
-//     const res = await fetch(
-//       `https://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/${stationID}`,
-//       {
-//         cache: 'no-store',
-//       }
-//     );
+  try {
+    const res = await fetch(
+      `https://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/${stationID}`,
+      {
+        cache: 'no-store',
+      }
+    );
 
-//     const data = await res.json();
+    const data = await res.json();
 
-//     const singleStationAqiID = data.stIndexLevel.indexLevelName;
+    const singleStationAqiID = data.stIndexLevel.indexLevelName;
 
-//     return singleStationAqiID;
-//   } catch (reason) {
-//     return null;
-//   }
-// };
+    return singleStationAqiID;
+  } catch (reason) {
+    return null;
+  }
+};
 
 export const getSensorID = async (stationID) => {
   if (!stationID) return null;
@@ -97,7 +97,7 @@ export const getSensorData = async (sensorIDs) => {
       const res = await fetch(
         `https://api.gios.gov.pl/pjp-api/rest/data/getData/${sensorID}`,
         {
-          next: { revalidate: 60 },
+          cache: 'no-store'
         }
       );
 

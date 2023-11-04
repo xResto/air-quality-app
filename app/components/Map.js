@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 function Map(props) {
   const [coordinate, setCoordinate] = useState({
+
     lat: 52.077195,
     lng: 17.674482,
   });
@@ -97,15 +98,6 @@ function Map(props) {
                 key={station.id}
                 icon={icon}
                 onClick={() => {
-                  // onMarkerClick(station.id);
-                  // const stationAQIParam = createQueryString(
-                  //   'stationAQI',
-                  //   stationAQI
-                  // );
-                  // const stationIDParam = createQueryString(
-                  //   'stationID',
-                  //   station.id
-                  // );
                   const queryString = createQueryString(
                     'stationID',
                     station.id,
@@ -115,21 +107,6 @@ function Map(props) {
                   router.push(pathname + '?' + queryString, {
                     scroll: false,
                   });
-                  // router.push(
-                  //   pathname +
-                  //     '?' +
-                  //     createQueryString('stationAQI', stationAQI),
-                  //   {
-                  //     scroll: false,
-                  //   }
-                  // );
-                  // router.push(
-                  //   pathname +
-                  //     '?' +
-                  //     createQueryString('stationAQI', stationAQI) +
-                  //     '?' +
-                  //     createQueryString('stationID', station.id)
-                  // );
                 }}
               />
             );
