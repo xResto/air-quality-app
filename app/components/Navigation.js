@@ -5,30 +5,39 @@ import Image from 'next/image';
 
 export const Navigation = ({ clickedStationAQI, sensorData }) => {
   const [AQItxt, setAQItxt] = useState('');
+  const [airImage, setAirImage] = useState('');
 
   useEffect(() => {
     if (clickedStationAQI === '-1') {
       setAQItxt('Brak indeksu');
+      setAirImage(`${imgHelper}-1.svg`);
     } else if (clickedStationAQI !== null) {
       const helperTxt = 'jakość powietrza';
+      const imgHelper = 'aqi-image-';
       switch (clickedStationAQI) {
         case '0':
           setAQItxt(`Bardzo dobra ${helperTxt}`);
+          setAirImage(`${imgHelper}0.svg`);
           break;
         case '1':
           setAQItxt(`Dobra ${helperTxt}`);
+          setAirImage(`${imgHelper}1.svg`);
           break;
         case '2':
           setAQItxt(`Umiarkowania ${helperTxt}`);
+          setAirImage(`${imgHelper}2.svg`);
           break;
         case '3':
           setAQItxt(`Dostateczna ${helperTxt}`);
+          setAirImage(`${imgHelper}3.svg`);
           break;
         case '4':
           setAQItxt(`Zła ${helperTxt}`);
+          setAirImage(`${imgHelper}4.svg`);
           break;
         case '5':
           setAQItxt(`Bardzo zła ${helperTxt}`);
+          setAirImage(`${imgHelper}5.svg`);
           break;
       }
     }
@@ -114,9 +123,9 @@ export const Navigation = ({ clickedStationAQI, sensorData }) => {
       <div className='flex flex-col p-4'>
         {sensorData && (
           <Image
-            src='skipping-rope.svg'
-            width={250}
-            height={250}
+            src={airImage}
+            width={300}
+            height={300}
             alt='AirQualityImage'
             className='self-center'
           />
