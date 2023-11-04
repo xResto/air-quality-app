@@ -75,7 +75,7 @@ export const getSensorID = async (stationID) => {
     const res = await fetch(
       `https://api.gios.gov.pl/pjp-api/rest/station/sensors/${stationID}`,
       {
-        cache: 'no-store',
+        next: { revalidate: 900 },
       }
     );
 
