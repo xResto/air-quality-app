@@ -4,7 +4,6 @@ import {
   getAllStations,
   getAqiData,
   getSensorID,
-  getStationsID,
   getSensorData,
 } from './lib/getAirQualityData';
 
@@ -12,8 +11,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function Page({ searchParams }) {
   // Map
-  const stations = await getAllStations();
-  const stationsID = getStationsID(stations);
+  const { stations, stationsID } = await getAllStations();
   const AQI = await getAqiData(stationsID);
 
   // Navigation
@@ -24,14 +22,11 @@ export default async function Page({ searchParams }) {
 
   const sensorData = await getSensorData(sensorIDs);
 
-  const order = ['PM10', 'PM2.5', 'PM1', 'NO2', 'O3', 'SO2', 'CO', 'C6H6'];
-
   return (
     <div className='bg-slate-800 h-full'>
       <Navigation
         clickedStationAQI={clickedStationAQI}
         sensorData={sensorData}
-        // sensorIDs={sensorIDs}
       />
       <Map stations={stations} AQI={AQI} />
     </div>

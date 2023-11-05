@@ -8,17 +8,19 @@ export const getAllStations = async () => {
     );
     const stations = await res.json();
 
-    return stations;
+    const stationsID = stations.map((station) => station.id);
+
+    return { stations, stationsID };
   } catch (reason) {
     return null;
   }
 };
 
-export const getStationsID = (stations) => {
-  const stationsID = stations.map((station) => station.id);
+// export const getStationsID = (stations) => {
+//   const stationsID = stations.map((station) => station.id);
 
-  return stationsID;
-};
+//   return stationsID;
+// };
 
 export const getAqiData = async (stationsID) => {
   if (!stationsID) return null;
@@ -97,7 +99,7 @@ export const getSensorData = async (sensorIDs) => {
       const res = await fetch(
         `https://api.gios.gov.pl/pjp-api/rest/data/getData/${sensorID}`,
         {
-          cache: 'no-store'
+          cache: 'no-store',
         }
       );
 

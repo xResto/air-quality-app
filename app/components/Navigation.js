@@ -8,13 +8,15 @@ export const Navigation = ({ clickedStationAQI, sensorData }) => {
   const [airImage, setAirImage] = useState('');
 
   useEffect(() => {
-    if (clickedStationAQI === '-1') {
-      setAQItxt('Brak indeksu');
-      setAirImage(`${imgHelper}-1.svg`);
-    } else if (clickedStationAQI !== null) {
+    const imgHelper = 'aqi-image-';
+    if (clickedStationAQI !== null) {
       const helperTxt = 'jakość powietrza';
-      const imgHelper = 'aqi-image-';
+
       switch (clickedStationAQI) {
+        case '-1':
+          setAQItxt('Brak indeksu');
+          setAirImage(`${imgHelper}-1.svg`);
+          break;
         case '0':
           setAQItxt(`Bardzo dobra ${helperTxt}`);
           setAirImage(`${imgHelper}0.svg`);
@@ -24,7 +26,7 @@ export const Navigation = ({ clickedStationAQI, sensorData }) => {
           setAirImage(`${imgHelper}1.svg`);
           break;
         case '2':
-          setAQItxt(`Umiarkowania ${helperTxt}`);
+          setAQItxt(`Umiarkowana ${helperTxt}`);
           setAirImage(`${imgHelper}2.svg`);
           break;
         case '3':
