@@ -2,7 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body, #root {
-   width: 100%;
-   height: 100%;
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+::-webkit-scrollbar-track {
+  background: #001c30;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #176b87;
+  border-radius: 1.5rem;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #38a3a5;
 }

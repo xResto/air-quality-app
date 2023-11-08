@@ -17,13 +17,11 @@ export default async function Page({ searchParams }) {
   // Navigation
   const clickedStationID = searchParams?.stationID ?? '';
   const clickedStationAQI = searchParams?.stationAQI ?? '';
-
   const sensorIDs = await getSensorID(clickedStationID);
-
   const sensorData = await getSensorData(sensorIDs);
 
   return (
-    <div className='bg-slate-800 h-full'>
+    <div className='bg-slate-800 h-full w-full'>
       <Navigation
         clickedStationAQI={clickedStationAQI}
         sensorData={sensorData}

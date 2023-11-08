@@ -1,3 +1,5 @@
+import 'server-only';
+
 export const getAllStations = async () => {
   try {
     const res = await fetch(
@@ -15,12 +17,6 @@ export const getAllStations = async () => {
     return null;
   }
 };
-
-// export const getStationsID = (stations) => {
-//   const stationsID = stations.map((station) => station.id);
-
-//   return stationsID;
-// };
 
 export const getAqiData = async (stationsID) => {
   if (!stationsID) return null;
@@ -112,6 +108,12 @@ export const getSensorData = async (sensorIDs) => {
   });
 
   const sensorData = await Promise.all(sensorDataRequests);
+
+  const order = ['PM10', 'PM2.5', 'O3', 'NO2', 'SO2', 'C6H6', 'CO'];
+
+  sensorData.sort((a, b) => {
+    return order.indexOf(a.key) - order.indexOf(b.key);
+  });
 
   return sensorData;
 };

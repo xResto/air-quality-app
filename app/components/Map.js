@@ -6,7 +6,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 function Map(props) {
   const [coordinate, setCoordinate] = useState({
-
     lat: 52.077195,
     lng: 17.674482,
   });
@@ -73,7 +72,7 @@ function Map(props) {
   };
 
   return (
-    <div>
+    <div className=' fixed right-0'>
       <LoadScript
         googleMapsApiKey={process.env.NEXT_PUBLIC_API_KEY}
         mapIds={['38f2ffead1e9ae5d']}
