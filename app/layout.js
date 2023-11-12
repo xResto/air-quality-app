@@ -1,6 +1,7 @@
 import './globals.css';
 
 import { Montserrat } from 'next/font/google';
+import ArrowFlagContextProvider from './components/store/arrowFlagContext';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -15,7 +16,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang='en' className={montserrat.className}>
-      <body>{children}</body>
+      <body>
+        <ArrowFlagContextProvider>{children}</ArrowFlagContextProvider>
+      </body>
     </html>
   );
 }

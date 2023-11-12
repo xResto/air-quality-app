@@ -1,17 +1,75 @@
 'use client';
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import ChartComponent from './ChartComponent';
+import AQIranking from './AQIranking';
+import { useArrowFlagContext } from './store/arrowFlagContext';
 
-export const Navigation = ({ clickedStationAQI, sensorData }) => {
+export const Navigation = ({
+  clickedStationID,
+  clickedStationAQI,
+  sensorData,
+  AQI,
+  stations,
+}) => {
   const [AQItxt, setAQItxt] = useState('');
   const [airImage, setAirImage] = useState('');
+  const [AQITextColor, setAQITextColor] = useState('text-white');
+  const { arrowFlag, setArrowFlag } = useArrowFlagContext();
+
+  console.log(arrowFlag);
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const stationName = stations.find(
+    (station) => station.id == clickedStationID
+  );
 
   useEffect(() => {
-    const imgHelper = 'aqi-image-';
+    if (searchParams.get('stationID') && searchParams.get('stationAQI')) {
+      setArrowFlag(true);
+    } else {
+      setArrowFlag(false);
+    }
+  }, [searchParams, setArrowFlag]);
+
+  const deleteQueryString = useCallback(
+    (name1, name2) => {
+      const params = new URLSearchParams(searchParams);
+      params.delete(name1);
+      params.delete(name2);
+
+      const path = typeof pathname === 'function' ? pathname() : pathname;
+
+      router.replace(`${path}?${params.toString()}`, undefined, {
+        shallow: true,
+      });
+    },
+    [searchParams, router, pathname]
+  );
+
+  const AQIcolorPalette = {
+    '-1': 'bg-[#808080]',
+    0: 'bg-[#108404]',
+    1: 'bg-[#18cc04]',
+    2: 'bg-[#f4f804]',
+    3: 'bg-[#ff7c04]',
+    4: 'bg-[#e00404]',
+    5: 'bg-[#98046c]',
+  };
+
+  const aqiBackgroundClass =
+    AQIcolorPalette[clickedStationAQI] || 'bg-transparent';
+
+  useEffect(() => {
     if (clickedStationAQI !== null) {
+      const imgHelper = 'aqi-image-';
       const helperTxt = 'jakość powietrza';
+
+      setAQITextColor(clickedStationAQI === '2' ? 'text-black' : 'text-white');
 
       switch (clickedStationAQI) {
         case '-1':
@@ -31,7 +89,7 @@ export const Navigation = ({ clickedStationAQI, sensorData }) => {
           setAirImage(`${imgHelper}2.svg`);
           break;
         case '3':
-          setAQItxt(`Dostateczna ${helperTxt}`);
+          setAQItxt(`Niezadowalająca ${helperTxt}`);
           setAirImage(`${imgHelper}3.svg`);
           break;
         case '4':
@@ -44,106 +102,122 @@ export const Navigation = ({ clickedStationAQI, sensorData }) => {
           break;
       }
     }
-
-    // return cleanUp = () => {
-
-    // }
-  }, [clickedStationAQI]);
-
-  // const order = ['PM10', 'PM2.5', 'PM1', 'NO2', 'O3', 'SO2', 'CO', 'C6H6'];
+  }, [clickedStationID]);
 
   const getLatestSensorValues = (sensorData) => {
     if (sensorData) {
-      // sensorData.sort((a, b) => {
-      //   return order.indexOf(a.key) - order.indexOf(b.key);
-      // });
+      return (
+        <ul className='text-xl'>
+          {sensorData.map((sensor, index) => {
+            const key = sensor.key;
+            let latestNonNullValue = null;
+            let latestDate = null;
 
-      return sensorData.map((sensor) => {
-        const key = sensor.key;
-        let latestNonNullValue = null;
-        let latestDate = null;
+            for (let i = 0; i < sensor.values.length; i++) {
+              const { date, value } = sensor.values[i];
+              if (value) {
+                const latestNumber = value.toFixed(1).slice(-1);
+                latestNonNullValue =
+                  latestNumber === 0 ? value.toFixed() : value.toFixed(1);
+                latestDate = date;
+                break;
+              }
+            }
 
-        for (let i = 0; i < sensor.values.length; i++) {
-          const { date, value } = sensor.values[i];
-          if (value) {
-            const lastNumber = value.toFixed(1).slice(-1);
-            latestNonNullValue =
-              lastNumber == 0 ? value.toFixed() : value.toFixed(1);
-            latestDate = date;
-            break;
-          }
-        }
+            const supHandler = (key) => {
+              if (key === 'NO2' || key === 'SO2') {
+                return (
+                  <>
+                    {key.slice(0, -1)}
+                    <sub>2</sub>
+                  </>
+                );
+              } else if (key === 'C6H6') {
+                return (
+                  <>
+                    C<sub>6</sub>H<sub>6</sub>
+                  </>
+                );
+              } else {
+                return key;
+              }
+            };
 
-        const supHandler = (key) => {
-          if (key === 'NO2' || key === 'SO2') {
-            return (
-              <>
-                {key.slice(0, -1)}
-                <sub>2</sub>
-              </>
-            );
-          } else if (key === 'C6H6') {
-            return (
-              <>
-                C<sub>6</sub>H<sub>6</sub>
-              </>
-            );
-          } else {
-            return key;
-          }
-        };
-
-        if (latestNonNullValue) {
-          return (
-            <ul className='text-xl'>
-              <li key={key}>
-                <p className='text-sm'>Pomiar z godziny: {latestDate.slice(-8, -3)}</p>
-                <div className='mb-1'>
-                  {supHandler(key)}:{' '}
-                  <div className='inline font-bold text-2xl'>
-                    {latestNonNullValue}
-                  </div>{' '}
-                  &#181;g/m
-                  <sup>3</sup>
-                </div>
-              </li>
-            </ul>
-          );
-        } else {
-          return;
-          // (
-          //   <div key={key}>
-          //     <p>No data found.</p>
-          //   </div>
-          // );
-        }
-      });
+            if (latestNonNullValue) {
+              return (
+                <li key={index}>
+                  <p className='text-xs font-extralight flex self-end'>
+                    {/* Pomiar z godz.: {formatDate(latestDate)} */}
+                    Pomiar z godz.: {latestDate.slice(-8, -3)}
+                  </p>
+                  <div key={latestNonNullValue.indexOf()} className='mb-1'>
+                    {supHandler(key)}:{' '}
+                    <div className='inline font-bold text-2xl'>
+                      {latestNonNullValue}
+                    </div>{' '}
+                    &#181;g/m
+                    <sup>3</sup>
+                  </div>
+                </li>
+              );
+            } else {
+              return;
+              // (
+              //   <div key={key}>
+              //     <p>No data found.</p>
+              //   </div>
+              // );
+            }
+          })}
+        </ul>
+      );
     }
-
     return null;
   };
 
   return (
-    <div className='absolute z-10 md:w-48 lg:w-96 h-full text-lg bg-blue0 border-r-2 border-blue2 text-white overflow-y-scroll'>
-      <div className='flex flex-col p-4'>
-        {sensorData && (
+    <>
+      <div className='flex flex-col md:w-80 lg:w-96 h-[100vh] text-base border-r-[1px] border-blue2 text-white'>
+        {arrowFlag && sensorData && (
           <Image
-            src={airImage}
-            width={300}
-            height={300}
-            alt='AirQualityImage'
-            className='self-center'
+            src='arrow-left.svg'
+            width={60}
+            height={60}
+            className='absolute hover:cursor-pointer'
+            onMouseOver={() => {}}
+            onClick={() => {
+              setArrowFlag(false);
+              deleteQueryString('stationID', 'stationAQI');
+            }}
           />
         )}
-        <p className='mb-4 self-center'>{AQItxt}</p>
-        {sensorData && (
-          <div className='border-[1px] border-solid border-blue2 mb-2'></div>
-        )}
-        {getLatestSensorValues(sensorData)}
+        <div className='flex flex-col py-2 p-4 overflow-y-scroll md:w-80 lg:w-96'>
+          {!arrowFlag && <AQIranking AQI={AQI} stations={stations} />}
+          {sensorData && (
+            <>
+              <Image
+                src={airImage}
+                width={280}
+                height={280}
+                alt='AirQualityImage'
+                className='self-center'
+              />
+              <div
+                className={`self-center py-1 px-3 rounded-2xl font-semibold text- text-lg ${AQITextColor} ${aqiBackgroundClass}`}
+              >
+                {AQItxt}
+              </div>
+              <div className='text-base font-bold text-center mt-2 mb-2'>
+                {stationName.stationName}
+              </div>
+              <div className='border border-solid border-blue2 mb-2'></div>
+            </>
+          )}
+          {getLatestSensorValues(sensorData)}
 
-        {/* Charts */}
-        {sensorData && <ChartComponent sensorData={sensorData} />}
+          {sensorData && <ChartComponent sensorData={sensorData} />}
+        </div>
       </div>
-    </div>
+    </>
   );
 };

@@ -1,11 +1,9 @@
-import 'server-only';
-
 export const getAllStations = async () => {
   try {
     const res = await fetch(
       'https://api.gios.gov.pl/pjp-api/rest/station/findAll',
       {
-        next: { revalidate: 43200 },
+        next: { revalidate: 21600 },
       }
     );
     const stations = await res.json();
@@ -13,7 +11,7 @@ export const getAllStations = async () => {
     const stationsID = stations.map((station) => station.id);
 
     return { stations, stationsID };
-  } catch (reason) {
+  } catch (error) {
     return null;
   }
 };
@@ -28,14 +26,14 @@ export const getAqiData = async (stationsID) => {
       const res = await fetch(
         `https://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/${stationID}`,
         {
-          next: { revalidate: 900 },
+          next: { revalidate: 300 },
         }
       );
 
       const data = await res.json();
 
       return data;
-    } catch (reason) {
+    } catch (error) {
       return null;
     }
   });
@@ -43,27 +41,6 @@ export const getAqiData = async (stationsID) => {
   const aqi = await Promise.all(aqiRequests);
 
   return aqi;
-};
-
-export const getSingleStationAQI = async (stationID) => {
-  if (!stationID) return null;
-
-  try {
-    const res = await fetch(
-      `https://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/${stationID}`,
-      {
-        cache: 'no-store',
-      }
-    );
-
-    const data = await res.json();
-
-    const singleStationAqiID = data.stIndexLevel.indexLevelName;
-
-    return singleStationAqiID;
-  } catch (reason) {
-    return null;
-  }
 };
 
 export const getSensorID = async (stationID) => {
@@ -82,13 +59,23 @@ export const getSensorID = async (stationID) => {
     const sensorsID = data.map((data) => data.id);
 
     return sensorsID;
-  } catch (reason) {
+  } catch (error) {
     return null;
   }
 };
 
 export const getSensorData = async (sensorIDs) => {
   if (!sensorIDs) return null;
+
+  const reformatDateString = (dateStr) => {
+    const dateTimeParts = dateStr.split(' ');
+    const dateParts = dateTimeParts[0].split('-');
+    const timePart = dateTimeParts[1];
+
+    const reformattedDate = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
+
+    return `${reformattedDate} ${timePart}`;
+  };
 
   const sensorDataRequests = sensorIDs.map(async (sensorID) => {
     try {
@@ -101,8 +88,16 @@ export const getSensorData = async (sensorIDs) => {
 
       const data = await res.json();
 
+      if (data && data.values) {
+        data.values.forEach(entry => {
+          if (entry.date) {
+            entry.date = reformatDateString(entry.date);
+          }
+        });
+      }
+
       return data;
-    } catch (reason) {
+    } catch (error) {
       return null;
     }
   });

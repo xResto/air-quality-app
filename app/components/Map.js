@@ -3,66 +3,44 @@
 import { useState, useCallback } from 'react';
 import { GoogleMap, LoadScript, MarkerF } from '@react-google-maps/api';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useArrowFlagContext } from './store/arrowFlagContext';
+import Image from 'next/image';
 
 function Map(props) {
-  const [coordinate, setCoordinate] = useState({
-    lat: 52.077195,
-    lng: 17.674482,
-  });
   const [zoom, setZoom] = useState(7);
-
+  const [coordinate, setCoordinate] = useState({
+    lat: 52.077,
+    lng: 19.1,
+  });
+  const mapContainerStyle = {
+    width: '100%',
+    height: '100%',
+  };
+  const { arrowFlag, setArrowFlag } = useArrowFlagContext();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // const onMarkerClick = (stationID) => {
-  //   const current = new URLSearchParams(searchParams);
-  //   current.set('stationID', stationID);
-
-  //   const query = current ? `?${current}` : '';
-  //   router.push(`${pathname}${query}`);
-  // };
-
   const createQueryString = useCallback(
     (name1, value1, name2, value2) => {
       const params = new URLSearchParams(searchParams);
-      params.set(name1, value1);
-      params.set(name2, value2);
+      params.set(name1, value1); // stationID
+      params.set(name2, value2); // stationAQI
 
       return params.toString();
     },
     [searchParams]
   );
 
-  // const onDelete = (stationID) => {
-  //   const current = new URLSearchParams(searchParams);
-  //   current.delete('stationID');
-
-  //   const query = current ? `?${current}` : '';
-  //   router.push(`${pathname}${query}`);
-  // };
-
-  const mapContainerStyle = {
-    width: '100vw',
-    height: '100vh',
-  };
-
   const getMarkerIcon = (stationID) => {
     const thisStation = props.AQI.find((station) => station.id === stationID);
 
-    // if (thisStation && thisStation.stIndexLevel) {
-    //   const stationAqiID = thisStation.stIndexLevel.id + '.png';
-    //   return stationAqiID;
-    // }
-
-    // return '-1.png';
-
-    let icon = '-1.png'; // Default icon if stationAqiID is not found
-    let stationAQI = '-1'; // Default value if stationAqiID is not found
+    let icon = '-1.png'; // default icon
+    let stationAQI = '-1'; // default AQI
 
     if (thisStation && thisStation.stIndexLevel) {
       stationAQI = thisStation.stIndexLevel.id;
-      icon = stationAQI + '.png';
+      icon = stationAQI + '.png'; // icon based on AQI
     }
 
     return {
@@ -72,47 +50,60 @@ function Map(props) {
   };
 
   return (
-    <div className=' fixed right-0'>
-      <LoadScript
-        googleMapsApiKey={process.env.NEXT_PUBLIC_API_KEY}
-        mapIds={['38f2ffead1e9ae5d']}
-      >
-        <GoogleMap
-          mapContainerStyle={mapContainerStyle}
-          center={coordinate}
-          zoom={zoom}
-          options={{
-            mapId: '38f2ffead1e9ae5d',
-            mapTypeControl: false,
-            fullscreenControl: false,
-            streetViewControl: false,
-            zoomControl: false,
-          }}
-        >
-          {props.stations.map((station) => {
-            const { icon, stationAQI } = getMarkerIcon(station.id);
-            return (
-              <MarkerF
-                position={{ lat: +station.gegrLat, lng: +station.gegrLon }}
-                key={station.id}
-                icon={icon}
-                onClick={() => {
-                  const queryString = createQueryString(
-                    'stationID',
-                    station.id,
-                    'stationAQI',
-                    stationAQI
-                  );
-                  router.push(pathname + '?' + queryString, {
-                    scroll: false,
-                  });
-                }}
+    <main className='w-full'>
+      <div className='h-full'>
+        <LoadScript
+          googleMapsApiKey={process.env.NEXT_PUBLIC_API_KEY}
+          mapIds={['38f2ffead1e9ae5d']}
+          loadingElement={
+            <div className='h-full w-full flex bg-blue0 justify-center'>
+              <Image
+                src={'loading-animation.svg'}
+                width={400}
+                height={400}
+                className='self-center'
               />
-            );
-          })}
-        </GoogleMap>
-      </LoadScript>
-    </div>
+            </div>
+          }
+        >
+          <GoogleMap
+            mapContainerStyle={mapContainerStyle}
+            center={coordinate}
+            zoom={zoom}
+            options={{
+              mapId: '38f2ffead1e9ae5d',
+              mapTypeControl: false,
+              fullscreenControl: false,
+              streetViewControl: false,
+              zoomControl: true,
+            }}
+          >
+            {props.stations.map((station) => {
+              const { icon, stationAQI } = getMarkerIcon(station.id);
+              return (
+                <MarkerF
+                  position={{ lat: +station.gegrLat, lng: +station.gegrLon }}
+                  key={station.id}
+                  icon={icon}
+                  onClick={() => {
+                    const queryString = createQueryString(
+                      'stationID',
+                      station.id,
+                      'stationAQI',
+                      stationAQI
+                    );
+                    router.push(pathname + '?' + queryString, {
+                      scroll: false,
+                    });
+                    setArrowFlag(true);
+                  }}
+                />
+              );
+            })}
+          </GoogleMap>
+        </LoadScript>
+      </div>
+    </main>
   );
 }
 
