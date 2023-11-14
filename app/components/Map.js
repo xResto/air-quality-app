@@ -1,25 +1,22 @@
 'use client';
-
 import { useState, useCallback } from 'react';
-import { GoogleMap, LoadScript, MarkerF } from '@react-google-maps/api';
+import { LoadScript, GoogleMap, MarkerF } from '@react-google-maps/api';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useArrowFlagContext } from './store/arrowFlagContext';
+import { useArrowFlagContext } from '../store/arrowFlagContext';
 import Image from 'next/image';
 
-function Map(props) {
-  const [zoom, setZoom] = useState(7);
-  const [coordinate, setCoordinate] = useState({
-    lat: 52.077,
-    lng: 19.1,
-  });
+function MapComponent(props) {
   const mapContainerStyle = {
     width: '100%',
     height: '100%',
   };
+  const { coordinate, setCoordinate } = useArrowFlagContext();
+  const { zoom, setZoom } = useArrowFlagContext();
   const { arrowFlag, setArrowFlag } = useArrowFlagContext();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [mapInstance, setMapInstance] = useState(null);
 
   const createQueryString = useCallback(
     (name1, value1, name2, value2) => {
@@ -31,6 +28,22 @@ function Map(props) {
     },
     [searchParams]
   );
+
+  const handleLoad = (map) => {
+    setMapInstance(map);
+  };
+
+  const handleZoomChange = () => {
+    if (mapInstance) {
+      const newZoom = mapInstance.getZoom();
+      const currentCenter = mapInstance.getCenter();
+      setZoom(newZoom);
+      setCoordinate({
+        lat: currentCenter.lat(),
+        lng: currentCenter.lng(),
+      });
+    }
+  };
 
   const getMarkerIcon = (stationID) => {
     const thisStation = props.AQI.find((station) => station.id === stationID);
@@ -77,6 +90,8 @@ function Map(props) {
               streetViewControl: false,
               zoomControl: true,
             }}
+            onLoad={handleLoad}
+            onZoomChanged={handleZoomChange}
           >
             {props.stations.map((station) => {
               const { icon, stationAQI } = getMarkerIcon(station.id);
@@ -107,4 +122,4 @@ function Map(props) {
   );
 }
 
-export default Map;
+export default MapComponent;

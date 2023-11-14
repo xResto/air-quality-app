@@ -1,10 +1,8 @@
 'use client';
-
 import React from 'react';
 import { useCallback } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useArrowFlagContext } from './store/arrowFlagContext';
-import Image from 'next/image';
+import { useArrowFlagContext } from '../store/arrowFlagContext';
 
 const AQIranking = ({ AQI, stations }) => {
   const { arrowFlag, setArrowFlag } = useArrowFlagContext();
@@ -35,7 +33,7 @@ const AQIranking = ({ AQI, stations }) => {
       const station = stations[idx];
 
       let AQITextColor =
-        entry.stIndexLevel.id === 2 ? 'text-black' : 'text-white';
+      entry.stIndexLevel.id === 0 || entry.stIndexLevel.id === 4 || entry.stIndexLevel.id === 5  ? 'text-white' : 'text-black';
 
       const AQIcolorPalette = [
         'bg-[#108404]',
@@ -112,12 +110,10 @@ const AQIranking = ({ AQI, stations }) => {
 
   return (
     <>
-      <div className='flex'>
-        <Image src='rank.svg' width={75} height={75} />
-        <div className='flex justify-center text-2xl font-semibold text-center'>
-          Ranking jakości powietrza
-        </div>
+      <div className='flex justify-center text-2xl font-semibold text-center mb-2'>
+        Ranking jakości powietrza
       </div>
+      <span className='border border-blue2 mb-2'></span>
       <ul>{rank()}</ul>
     </>
   );

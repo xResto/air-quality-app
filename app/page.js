@@ -1,11 +1,15 @@
-import { Navigation } from './components/Navigation';
-import Map from './components/Map';
+// import dynamic from 'next/dynamic';
+// const Sidebar = dynamic(() => import('./components/Sidebar'), { ssr: false });
+import React from 'react';
+import Sidebar from './components/Sidebar';
+import Navigation from './components/Navigation';
 import {
   getAllStations,
   getAqiData,
   getSensorID,
   getSensorData,
 } from './lib/getAirQualityData';
+import MapComponent from './components/Map';
 
 // export const dynamic = 'force-dynamic';
 
@@ -27,22 +31,24 @@ export default async function Page({ searchParams }) {
   const { stations, stationsID } = await getAllStations();
   const AQI = await getAqiData(stationsID);
 
-  // Navigation
+  // Sidebar
   const clickedStationID = searchParams?.stationID ?? '';
   const clickedStationAQI = searchParams?.stationAQI ?? '';
+  
   const sensorIDS = await getSensorID(clickedStationID);
   const sensorData = await getSensorData(sensorIDS);
 
   return (
-    <div className='bg-blue0 h-full flex'>
-      <Navigation
+    <div className='bg-blue0 flex h-full'>
+      <Navigation />
+      <Sidebar
         clickedStationID={clickedStationID}
         clickedStationAQI={clickedStationAQI}
         sensorData={sensorData}
         AQI={AQI}
         stations={stations}
       />
-      <Map stations={stations} AQI={AQI} />
+      <MapComponent stations={stations} AQI={AQI} />
     </div>
   );
 }

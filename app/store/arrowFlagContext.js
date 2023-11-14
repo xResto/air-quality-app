@@ -6,9 +6,23 @@ const ArrowFlagContext = createContext(null);
 
 export default function ArrowFlagContextProvider({ children }) {
   const [arrowFlag, setArrowFlag] = useState(false);
+  const [coordinate, setCoordinate] = useState({
+    lat: 52.077,
+    lng: 19.1,
+  });
+  const [zoom, setZoom] = useState(7);
 
   return (
-    <ArrowFlagContext.Provider value={{ arrowFlag, setArrowFlag }}>
+    <ArrowFlagContext.Provider
+      value={{
+        arrowFlag,
+        setArrowFlag,
+        coordinate,
+        setCoordinate,
+        zoom,
+        setZoom,
+      }}
+    >
       {children}
     </ArrowFlagContext.Provider>
   );

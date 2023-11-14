@@ -1,7 +1,7 @@
 import './globals.css';
 
 import { Montserrat } from 'next/font/google';
-import ArrowFlagContextProvider from './components/store/arrowFlagContext';
+import ArrowFlagContextProvider from './store/arrowFlagContext';
 
 const montserrat = Montserrat({
   subsets: ['latin'],

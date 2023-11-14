@@ -26,7 +26,7 @@ export const getAqiData = async (stationsID) => {
       const res = await fetch(
         `https://api.gios.gov.pl/pjp-api/rest/aqindex/getIndex/${stationID}`,
         {
-          next: { revalidate: 300 },
+          next: { revalidate: 600 },
         }
       );
 
@@ -50,7 +50,7 @@ export const getSensorID = async (stationID) => {
     const res = await fetch(
       `https://api.gios.gov.pl/pjp-api/rest/station/sensors/${stationID}`,
       {
-        next: { revalidate: 900 },
+        next: { revalidate: 21600 },
       }
     );
 
@@ -89,7 +89,7 @@ export const getSensorData = async (sensorIDs) => {
       const data = await res.json();
 
       if (data && data.values) {
-        data.values.forEach(entry => {
+        data.values.forEach((entry) => {
           if (entry.date) {
             entry.date = reformatDateString(entry.date);
           }
@@ -107,6 +107,7 @@ export const getSensorData = async (sensorIDs) => {
   const order = ['PM10', 'PM2.5', 'O3', 'NO2', 'SO2', 'C6H6', 'CO'];
 
   sensorData.sort((a, b) => {
+    if (!a || !b) return null;
     return order.indexOf(a.key) - order.indexOf(b.key);
   });
 
