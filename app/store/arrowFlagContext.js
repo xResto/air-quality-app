@@ -5,22 +5,25 @@ import React, { createContext, useContext, useState } from 'react';
 const ArrowFlagContext = createContext(null);
 
 export default function ArrowFlagContextProvider({ children }) {
-  const [arrowFlag, setArrowFlag] = useState(false);
   const [coordinate, setCoordinate] = useState({
     lat: 52.077,
-    lng: 19.1,
+    lng: 18.8,
   });
   const [zoom, setZoom] = useState(7);
+  const [bookmark, setBookmark] = useState('ranking');
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <ArrowFlagContext.Provider
       value={{
-        arrowFlag,
-        setArrowFlag,
+        bookmark,
+        setBookmark,
         coordinate,
         setCoordinate,
         zoom,
         setZoom,
+        isLoading,
+        setIsLoading,
       }}
     >
       {children}

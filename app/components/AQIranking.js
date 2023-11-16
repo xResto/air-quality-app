@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useArrowFlagContext } from '../store/arrowFlagContext';
 
 const AQIranking = ({ AQI, stations }) => {
-  const { arrowFlag, setArrowFlag } = useArrowFlagContext();
+  const { bookmark, setBookmark, setIsLoading } = useArrowFlagContext();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -33,7 +33,11 @@ const AQIranking = ({ AQI, stations }) => {
       const station = stations[idx];
 
       let AQITextColor =
-      entry.stIndexLevel.id === 0 || entry.stIndexLevel.id === 4 || entry.stIndexLevel.id === 5  ? 'text-white' : 'text-black';
+        entry.stIndexLevel.id === 0 ||
+        entry.stIndexLevel.id === 4 ||
+        entry.stIndexLevel.id === 5
+          ? 'text-white'
+          : 'text-black';
 
       const AQIcolorPalette = [
         'bg-[#108404]',
@@ -95,7 +99,8 @@ const AQIranking = ({ AQI, stations }) => {
             router.push(pathname + '?' + queryString, {
               scroll: false,
             });
-            setArrowFlag(true);
+            setBookmark('stacja');
+            setIsLoading(true);
           }}
         >
           <div className={`${AQITextColor}`}>

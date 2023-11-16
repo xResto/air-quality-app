@@ -34,13 +34,13 @@ export default async function Page({ searchParams }) {
   // Sidebar
   const clickedStationID = searchParams?.stationID ?? '';
   const clickedStationAQI = searchParams?.stationAQI ?? '';
-  
+
   const sensorIDS = await getSensorID(clickedStationID);
   const sensorData = await getSensorData(sensorIDS);
 
   return (
     <div className='bg-blue0 flex h-full'>
-      <Navigation />
+      <Navigation stations={stations} AQI={AQI} />
       <Sidebar
         clickedStationID={clickedStationID}
         clickedStationAQI={clickedStationAQI}

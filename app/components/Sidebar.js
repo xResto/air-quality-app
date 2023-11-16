@@ -1,9 +1,11 @@
 'use client';
+import ChartComponent from './ChartComponent';
+import AQIranking from './AQIranking';
+import Searching from './Searching';
+import Loading from './Loading';
 import React, { useState, useEffect, useCallback } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import ChartComponent from './ChartComponent';
-import AQIranking from './AQIranking';
 import { useArrowFlagContext } from '../store/arrowFlagContext';
 
 const Sidebar = ({
@@ -16,9 +18,19 @@ const Sidebar = ({
   const [AQItxt, setAQItxt] = useState('');
   const [airImage, setAirImage] = useState('');
   const [AQITextColor, setAQITextColor] = useState('text-white');
-  const { arrowFlag, setArrowFlag } = useArrowFlagContext();
-  const { setCoordinate } = useArrowFlagContext();
-  const { setZoom } = useArrowFlagContext();
+  const {
+    bookmark,
+    coordinate,
+    isLoading,
+    setBookmark,
+    setIsLoading,
+    setCoordinate,
+    setZoom,
+  } = useArrowFlagContext();
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, [sensorData]);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -31,20 +43,20 @@ const Sidebar = ({
   const handleMapCenterChange = () => {
     if (thisStation) {
       setCoordinate({
-        lat: parseFloat(thisStation.gegrLat),
-        lng: parseFloat(thisStation.gegrLon),
+        lat: +thisStation.gegrLat,
+        lng: +thisStation.gegrLon,
       });
-      setZoom(12.5);
+      setZoom(11);
     }
   };
 
   useEffect(() => {
     if (searchParams.get('stationID') && searchParams.get('stationAQI')) {
-      setArrowFlag(true);
+      setBookmark('stacja');
     } else {
-      setArrowFlag(false);
+      setBookmark('ranking');
     }
-  }, [searchParams, setArrowFlag]);
+  }, [searchParams, setBookmark]);
 
   const deleteQueryString = useCallback(
     (name1, name2) => {
@@ -236,7 +248,6 @@ const Sidebar = ({
         </ul>
       );
     }
-
     return null;
   };
 
@@ -244,14 +255,18 @@ const Sidebar = ({
     <>
       <div className='flex md:w-80 lg:w-96 h-[100vh] border-r-[1px] border-blue2 text-white'>
         <div className='flex flex-col md:w-80 lg:w-96 py-2 p-4 overflow-y-scroll sm:text-sm lg:text-base'>
-          {!arrowFlag && <AQIranking AQI={AQI} stations={stations} />}
-          {sensorData && (
+          {isLoading && bookmark === 'stacja' && <Loading />}
+          {bookmark === 'ranking' && (
+            <AQIranking AQI={AQI} stations={stations} />
+          )}
+          {bookmark === 'searching' && <Searching />}
+          {!isLoading && bookmark === 'stacja' && sensorData && (
             <>
               <Image
                 src={airImage}
+                alt='Zdjęcie odzwierciedlające jakość powietrza'
                 width={280}
                 height={280}
-                alt='AirQualityImage'
                 className='self-center'
               />
               <div
@@ -262,7 +277,7 @@ const Sidebar = ({
               <div className='flex items-center justify-center mt-2 mb-2'>
                 <Image
                   src={'location-on-the-map.svg'}
-                  alt='Location icon pointing on the map'
+                  alt='Pinezka lokalizacji na mapie'
                   width={30}
                   height={30}
                   className='hover:cursor-pointer'
@@ -271,11 +286,11 @@ const Sidebar = ({
                 <span>{thisStation.stationName}</span>
               </div>
               <span className='border border-blue2 mb-3'></span>
+
+              {getLatestSensorValues(sensorData)}
+              <ChartComponent sensorData={sensorData} />
             </>
           )}
-          {getLatestSensorValues(sensorData)}
-
-          {sensorData && <ChartComponent sensorData={sensorData} />}
         </div>
       </div>
     </>
