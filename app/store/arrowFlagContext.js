@@ -12,6 +12,7 @@ export default function ArrowFlagContextProvider({ children }) {
   const [zoom, setZoom] = useState(7);
   const [bookmark, setBookmark] = useState('ranking');
   const [isLoading, setIsLoading] = useState(false);
+  const [userClosestStation, setUserClosestStation] = useState(null);
 
   return (
     <ArrowFlagContext.Provider
@@ -24,6 +25,8 @@ export default function ArrowFlagContextProvider({ children }) {
         setZoom,
         isLoading,
         setIsLoading,
+        userClosestStation,
+        setUserClosestStation,
       }}
     >
       {children}

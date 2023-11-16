@@ -1,10 +1,11 @@
+// components/Sidebar.js
 'use client';
 import ChartComponent from './ChartComponent';
 import AQIranking from './AQIranking';
 import Searching from './Searching';
 import Loading from './Loading';
-import React, { useState, useEffect, useCallback } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { useArrowFlagContext } from '../store/arrowFlagContext';
 
@@ -20,7 +21,6 @@ const Sidebar = ({
   const [AQITextColor, setAQITextColor] = useState('text-white');
   const {
     bookmark,
-    coordinate,
     isLoading,
     setBookmark,
     setIsLoading,
@@ -30,10 +30,10 @@ const Sidebar = ({
 
   useEffect(() => {
     setIsLoading(false);
-  }, [sensorData]);
+  }, [clickedStationID]);
 
-  const router = useRouter();
-  const pathname = usePathname();
+  // const router = useRouter();
+  // const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const thisStation = stations.find(
@@ -57,21 +57,6 @@ const Sidebar = ({
       setBookmark('ranking');
     }
   }, [searchParams, setBookmark]);
-
-  const deleteQueryString = useCallback(
-    (name1, name2) => {
-      const params = new URLSearchParams(searchParams);
-      params.delete(name1);
-      params.delete(name2);
-
-      const path = typeof pathname === 'function' ? pathname() : pathname;
-
-      router.replace(`${path}?${params.toString()}`, undefined, {
-        shallow: true,
-      });
-    },
-    [searchParams, router, pathname]
-  );
 
   const AQIcolorPalette = {
     '-1': 'bg-[#808080]',
@@ -134,6 +119,7 @@ const Sidebar = ({
 
   const getLatestSensorValues = (sensorData) => {
     if (sensorData) {
+      setIsLoading(false);
       return (
         <ul>
           {sensorData.map((sensor, index) => {
@@ -214,7 +200,6 @@ const Sidebar = ({
                   <div className='flex justify-between'>
                     <div>
                       <p className='text-xs font-extralight'>
-                        {/* Pomiar z godz.: {formatDate(latestDate)} */}
                         Pomiar z godz.: {latestDate.slice(-8, -3)}
                       </p>
 
@@ -255,8 +240,8 @@ const Sidebar = ({
     <>
       <div className='flex md:w-80 lg:w-96 h-[100vh] border-r-[1px] border-blue2 text-white'>
         <div className='flex flex-col md:w-80 lg:w-96 py-2 p-4 overflow-y-scroll sm:text-sm lg:text-base'>
-          {isLoading && bookmark === 'stacja' && <Loading />}
-          {bookmark === 'ranking' && (
+          {isLoading && <Loading />}
+          {bookmark === 'ranking' && !isLoading && (
             <AQIranking AQI={AQI} stations={stations} />
           )}
           {bookmark === 'searching' && <Searching />}

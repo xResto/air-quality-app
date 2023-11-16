@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { useArrowFlagContext } from '../store/arrowFlagContext';
@@ -7,7 +7,12 @@ import haversineDistance from 'haversine-distance';
 import { Tooltip } from '@nextui-org/react';
 
 const Navigation = ({ stations, AQI }) => {
-  const { setBookmark, setCoordinate, setZoom } = useArrowFlagContext();
+  const {
+    userClosestStation,
+    setBookmark,
+    setIsLoading,
+    setUserClosestStation,
+  } = useArrowFlagContext();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -66,29 +71,68 @@ const Navigation = ({ stations, AQI }) => {
         });
 
         stationID = stations[idx].id;
+
         const thisStation = AQI.find(
           (aqiStation) => aqiStation.id === stationID
         );
         if (thisStation && thisStation.stIndexLevel) {
           stationAQI = thisStation.stIndexLevel.id;
         }
+        if (searchParams.get('stationID') !== stationID.toString()) {
+          setIsLoading(true);
+          setBookmark('stacja');
+          const queryString = createQueryString(
+            'stationID',
+            stationID,
+            'stationAQI',
+            stationAQI
+          );
+          router.push(pathname + '?' + queryString, {
+            scroll: false,
+          });
+        } else {
+          setIsLoading(false);
+          setUserClosestStation(stationID);
+          console.log(userClosestStation);
+        }
       }
 
-      setBookmark('stacja');
-      setCoordinate({
-        lat: +stations[idx].gegrLat,
-        lng: +stations[idx].gegrLon,
-      });
-      setZoom(11);
-      const queryString = createQueryString(
-        'stationID',
-        stationID,
-        'stationAQI',
-        stationAQI
-      );
-      router.push(pathname + '?' + queryString, {
-        scroll: false,
-      });
+      // if (userClosestStation === stations[idx].id) {
+      //   return;
+      // } else {
+      //   setUserClosestStation(stations[idx].id);
+      //   setIsLoading(true);
+      //   console.log('eeeeeeeeee', userClosestStation);
+      // }
+      // setBookmark('stacja');
+      // setCoordinate({
+      //   lat: +stations[idx].gegrLat,
+      //   lng: +stations[idx].gegrLon,
+      // });
+      // setZoom(11);
+      // const queryString = createQueryString(
+      //   'stationID',
+      //   stationID,
+      //   'stationAQI',
+      //   stationAQI
+      // );
+      // router.push(pathname + '?' + queryString, {
+      //   scroll: false,
+      // });
+
+      // if (searchParams.get('stationID') !== stationID.toString()) {
+      //   setIsLoading(true);
+      //   setBookmark('stacja');
+      //   const queryString = createQueryString(
+      //     'stationID',
+      //     stationID,
+      //     'stationAQI',
+      //     stationAQI
+      //   );
+      //   router.push(pathname + '?' + queryString, {
+      //     scroll: false,
+      //   });
+      // }
     });
   };
 
@@ -122,10 +166,6 @@ const Navigation = ({ stations, AQI }) => {
             height={50}
             onMouseOver={() => {}}
             className='w-auto h-auto'
-            onClick={() => {
-              setBookmark('ranking');
-              deleteQueryString('stationID', 'stationAQI');
-            }}
           />
         </div>
       </Tooltip>

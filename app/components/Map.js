@@ -13,9 +13,9 @@ function MapComponent(props) {
   const {
     coordinate,
     zoom,
+    userClosestStation,
     setCoordinate,
     setZoom,
-    setBookmark,
     setIsLoading,
   } = useArrowFlagContext();
   const router = useRouter();
@@ -76,6 +76,83 @@ function MapComponent(props) {
     };
   };
 
+  // function debounce(func, wait) {
+  //   let timeout;
+
+  //   return function executedFunction(...args) {
+  //     const later = () => {
+  //       clearTimeout(timeout);
+  //       func(...args);
+  //     };
+
+  //     clearTimeout(timeout);
+  //     timeout = setTimeout(later, wait);
+  //   };
+  // }
+
+  // const handleMarkerClick = useCallback(
+  //   debounce((stationId, stationAQI) => {
+  //     if (
+  //       searchParams.get('stationID') === stationId.toString() ||
+  //       userClosestStation === stationId.toString()
+  //     ) {
+  //       return;
+  //     } else {
+  //       setIsLoading(true);
+  //       setBookmark('stacja');
+  //       const queryString = createQueryString(
+  //         'stationID',
+  //         stationId,
+  //         'stationAQI',
+  //         stationAQI
+  //       );
+  //       router.push(`${pathname}?${queryString}`, {
+  //         scroll: false,
+  //       });
+  //     }
+  //   }, 300),
+  //   [
+  //     setIsLoading,
+  //     setBookmark,
+  //     searchParams,
+  //     userClosestStation,
+  //     router,
+  //     pathname,
+  //     createQueryString,
+  //   ]
+  // );
+  
+
+  const handleMarkerClick = useCallback(
+    (stationId, stationAQI) => {
+      if (
+        searchParams.get('stationID') !== stationId.toString() &&
+        userClosestStation !== stationId.toString()
+      ) {
+        setIsLoading(true);
+        const queryString = createQueryString(
+          'stationID',
+          stationId,
+          'stationAQI',
+          stationAQI
+        );
+        router.push(`${pathname}?${queryString}`, {
+          scroll: false,
+        });
+      } else {
+        setIsLoading(false);
+      }
+    },
+    [
+      searchParams,
+      userClosestStation,
+      setIsLoading,
+      router,
+      pathname,
+      createQueryString,
+    ]
+  );
+
   return (
     <div className='relative h-full w-full'>
       <LoadScript
@@ -104,19 +181,7 @@ function MapComponent(props) {
                 position={{ lat: +station.gegrLat, lng: +station.gegrLon }}
                 key={station.id}
                 icon={icon}
-                onClick={() => {
-                  const queryString = createQueryString(
-                    'stationID',
-                    station.id,
-                    'stationAQI',
-                    stationAQI
-                  );
-                  router.push(pathname + '?' + queryString, {
-                    scroll: false,
-                  });
-                  setBookmark('stacja');
-                  setIsLoading(true);
-                }}
+                onClick={() => handleMarkerClick(station.id, stationAQI)}
               />
             );
           })}

@@ -6,6 +6,7 @@ import ArrowFlagContextProvider from './store/arrowFlagContext';
 const montserrat = Montserrat({
   subsets: ['latin'],
   display: 'swap',
+  variable: '--font-montserrat',
 });
 
 export const metadata = {
@@ -15,7 +16,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang='en' className={montserrat.className}>
+    <html lang='en' className={montserrat.variable}>
       <body>
         <ArrowFlagContextProvider>{children}</ArrowFlagContextProvider>
       </body>

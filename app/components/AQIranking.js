@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useArrowFlagContext } from '../store/arrowFlagContext';
 
 const AQIranking = ({ AQI, stations }) => {
-  const { bookmark, setBookmark, setIsLoading } = useArrowFlagContext();
+  const { setBookmark, setIsLoading } = useArrowFlagContext();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -89,6 +89,7 @@ const AQIranking = ({ AQI, stations }) => {
         <li
           key={index}
           className={`flex flex-col items-center text-center p-1 mb-1 rounded-2xl ${AQIcolor} hover:cursor-pointer`}
+          href={`/${entry.id}`}
           onClick={() => {
             const queryString = createQueryString(
               'stationID',
