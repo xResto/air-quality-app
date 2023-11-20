@@ -12,6 +12,8 @@ const Navigation = ({ stations, AQI }) => {
     setBookmark,
     setIsLoading,
     setUserClosestStation,
+    setIsMarkerSelected,
+    setSelectedStationID,
   } = useArrowFlagContext();
   const router = useRouter();
   const pathname = usePathname();
@@ -80,7 +82,9 @@ const Navigation = ({ stations, AQI }) => {
         }
         if (searchParams.get('stationID') !== stationID.toString()) {
           setIsLoading(true);
-          setBookmark('stacja');
+          setBookmark('station');
+          setIsMarkerSelected(true);
+          setSelectedStationID(stationID);
           const queryString = createQueryString(
             'stationID',
             stationID,
@@ -157,6 +161,8 @@ const Navigation = ({ stations, AQI }) => {
           onClick={() => {
             setBookmark('ranking');
             deleteQueryString('stationID', 'stationAQI');
+            setIsMarkerSelected(false);
+            setSelectedStationID(null);
           }}
         >
           <Image
@@ -197,6 +203,37 @@ const Navigation = ({ stations, AQI }) => {
         </div>
       </Tooltip>
       <Tooltip
+        content='Ulubione stacje'
+        showArrow={true}
+        placement='right'
+        offset={-12}
+        delay={0}
+        closeDelay={0}
+        classNames={{
+          content: [
+            'py-2 px-4',
+            'text-black rounded-2xl bg-blue3 font-medium text-xs',
+          ],
+        }}
+      >
+        <div
+          className='w-full h-20 hover:bg-blue0v2 hover:cursor-pointer flex justify-center content-center p-2 lg:p-4'
+          onClick={() => {
+            setBookmark('favorites');
+            setIsMarkerSelected(false);
+            setSelectedStationID(null);
+          }}
+        >
+          <Image
+            src='fav.svg'
+            alt='Ikonka lupy'
+            width={50}
+            height={50}
+            className='w-auto h-auto'
+          />
+        </div>
+      </Tooltip>
+      <Tooltip
         content='Wyszukaj miejscowość'
         showArrow={true}
         placement='right'
@@ -210,16 +247,20 @@ const Navigation = ({ stations, AQI }) => {
           ],
         }}
       >
-        <div className='w-full h-20 hover:bg-blue0v2 hover:cursor-pointer flex justify-center content-center p-2 lg:p-4'>
+        <div
+          className='w-full h-20 hover:bg-blue0v2 hover:cursor-pointer flex justify-center content-center p-2 lg:p-4'
+          onClick={() => {
+            setBookmark('searching');
+            setIsMarkerSelected(false);
+            setSelectedStationID(null);
+          }}
+        >
           <Image
             src='searching.svg'
             alt='Ikonka lupy'
             width={50}
             height={50}
             className='w-auto h-auto'
-            onClick={() => {
-              setBookmark('searching');
-            }}
           />
         </div>
       </Tooltip>

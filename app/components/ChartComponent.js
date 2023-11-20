@@ -98,9 +98,8 @@ const ChartComponent = ({ sensorData }) => {
   return (
     <section>
       {dataset.map((data, index) => (
-        <>
+        <div key={index}>
           <Bar
-            key={index}
             options={{
               responsive: true,
               plugins: {
@@ -131,7 +130,7 @@ const ChartComponent = ({ sensorData }) => {
             <p>{data.middleDate}</p>
             <p>{data.oldestDate}</p>
           </div>
-        </>
+        </div>
       ))}
     </section>
   );

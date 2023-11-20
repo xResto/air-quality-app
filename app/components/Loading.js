@@ -7,6 +7,7 @@ const Loading = () => {
       <div className='flex bg-blue0 w-full h-full justify-center'>
         <Image
           src={'loading-animation.svg'}
+          alt='Laptop with loading text on its display'
           width={400}
           height={400}
           className='self-center'

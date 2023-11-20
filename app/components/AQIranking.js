@@ -5,7 +5,12 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useArrowFlagContext } from '../store/arrowFlagContext';
 
 const AQIranking = ({ AQI, stations }) => {
-  const { setBookmark, setIsLoading } = useArrowFlagContext();
+  const {
+    setBookmark,
+    setIsLoading,
+    setIsMarkerSelected,
+    setSelectedStationID,
+  } = useArrowFlagContext();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -86,30 +91,32 @@ const AQIranking = ({ AQI, stations }) => {
       const [stationCity, stationAddress] = station.stationName.split(',');
 
       return (
-        <li
-          key={index}
-          className={`flex flex-col items-center text-center p-1 mb-1 rounded-2xl ${AQIcolor} hover:cursor-pointer`}
-          href={`/${entry.id}`}
-          onClick={() => {
-            const queryString = createQueryString(
-              'stationID',
-              entry.id,
-              'stationAQI',
-              entry.stIndexLevel.id
-            );
-            router.push(pathname + '?' + queryString, {
-              scroll: false,
-            });
-            setBookmark('stacja');
-            setIsLoading(true);
-          }}
-        >
-          <div className={`${AQITextColor}`}>
-            {stationCity}
-            <span className='font-light'>{stationAddress}</span>
-          </div>
-          <div className={`font-semibold ${AQITextColor}`}>{AQItxt}</div>
-        </li>
+          <li
+            key={index}
+            className={`flex flex-col items-center text-center p-1 mb-1 rounded-2xl ${AQIcolor} hover:cursor-pointer transform hover:scale-[1.035] transition-transform`}
+            href={`/${entry.id}`}
+            onClick={() => {
+              const queryString = createQueryString(
+                'stationID',
+                entry.id,
+                'stationAQI',
+                entry.stIndexLevel.id
+              );
+              router.push(pathname + '?' + queryString, {
+                scroll: false,
+              });
+              setIsMarkerSelected(true);
+              setSelectedStationID(entry.id);
+              setBookmark('stacja');
+              setIsLoading(true);
+            }}
+          >
+            <div className={`${AQITextColor}`}>
+              {stationCity}
+              <span className='font-light'>{stationAddress}</span>
+            </div>
+            <div className={`font-semibold ${AQITextColor}`}>{AQItxt}</div>
+          </li>
       );
     });
   };
