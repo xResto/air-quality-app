@@ -5,45 +5,34 @@ import Image from 'next/image';
 import { useArrowFlagContext } from '../store/arrowFlagContext';
 import haversineDistance from 'haversine-distance';
 import { Tooltip } from '@nextui-org/react';
+import { deleteQueryString } from '../utils/queryString';
 
 const Navigation = ({ stations, AQI }) => {
   const {
+    selectedPollutants,
     userClosestStation,
     setBookmark,
     setIsLoading,
     setUserClosestStation,
     setIsMarkerSelected,
     setSelectedStationID,
+    setSelectedPollutants,
+    setIsRaportActive,
   } = useArrowFlagContext();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const createQueryString = useCallback(
-    (name1, value1, name2, value2) => {
-      const params = new URLSearchParams(searchParams);
-      params.set(name1, value1); // stationID
-      params.set(name2, value2); // stationAQI
+  // const createQueryString = useCallback(
+  //   (name1, value1, name2, value2) => {
+  //     const params = new URLSearchParams(searchParams);
+  //     params.set(name1, value1); // stationID
+  //     params.set(name2, value2); // stationAQI
 
-      return params.toString();
-    },
-    [searchParams]
-  );
-
-  const deleteQueryString = useCallback(
-    (name1, name2) => {
-      const params = new URLSearchParams(searchParams);
-      params.delete(name1);
-      params.delete(name2);
-
-      const path = typeof pathname === 'function' ? pathname() : pathname;
-
-      router.replace(`${path}?${params.toString()}`, undefined, {
-        shallow: true,
-      });
-    },
-    [searchParams, router, pathname]
-  );
+  //     return params.toString();
+  //   },
+  //   [searchParams]
+  // );
 
   const userLocationHandler = () => {
     navigator.geolocation.getCurrentPosition((position) => {
@@ -85,13 +74,16 @@ const Navigation = ({ stations, AQI }) => {
           setBookmark('station');
           setIsMarkerSelected(true);
           setSelectedStationID(stationID);
-          const queryString = createQueryString(
-            'stationID',
-            stationID,
-            'stationAQI',
-            stationAQI
+          setSelectedPollutants([]);
+          setIsRaportActive(false);
+          const params = new URLSearchParams(searchParams);
+          ['sensorID', 'dateFrom', 'dateTo'].forEach((param) =>
+            params.delete(param)
           );
-          router.push(pathname + '?' + queryString, {
+
+          params.set('stationID', stationID);
+          params.set('stationAQI', stationAQI);
+          router.push(`${pathname}?${params.toString()}`, {
             scroll: false,
           });
         } else {
@@ -141,7 +133,7 @@ const Navigation = ({ stations, AQI }) => {
   };
 
   return (
-    <div className='flex flex-col items-center h-full flex-shrink-0 sm:w-14 lg:w-20 border-r-[1px] border-blue2'>
+    <div className='flex flex-col items-center h-full flex-shrink-0 md:w-14 lg:w-20 border-r-[1px] border-blue2'>
       <Tooltip
         content='Ranking jakości powietrza'
         showArrow={true}
@@ -157,12 +149,19 @@ const Navigation = ({ stations, AQI }) => {
         }}
       >
         <div
-          className='w-full h-20 hover:bg-blue0v2 hover:cursor-pointer flex justify-center content-center p-2 lg:p-4'
+          className='w-full h-20 flex justify-center content-center p-2 lg:p-4 hover:bg-blue0v2 hover:cursor-pointer transition-colors'
           onClick={() => {
+            deleteQueryString(
+              ['stationID', 'stationAQI', 'sensorID', 'dateFrom', 'dateTo'],
+              router,
+              pathname,
+              searchParams
+            );
             setBookmark('ranking');
-            deleteQueryString('stationID', 'stationAQI');
             setIsMarkerSelected(false);
             setSelectedStationID(null);
+            setSelectedPollutants([]);
+            setIsRaportActive(false);
           }}
         >
           <Image
@@ -190,7 +189,7 @@ const Navigation = ({ stations, AQI }) => {
         }}
       >
         <div
-          className='w-full h-20 hover:bg-blue0v2 hover:cursor-pointer flex justify-center content-center p-2 lg:p-4'
+          className='w-full h-20 flex justify-center content-center p-2 lg:p-4 hover:bg-blue0v2 hover:cursor-pointer transition-colors'
           onClick={userLocationHandler}
         >
           <Image
@@ -217,47 +216,24 @@ const Navigation = ({ stations, AQI }) => {
         }}
       >
         <div
-          className='w-full h-20 hover:bg-blue0v2 hover:cursor-pointer flex justify-center content-center p-2 lg:p-4'
+          className='w-full h-20 flex justify-center content-center p-2 lg:p-4 hover:bg-blue0v2 hover:cursor-pointer transition-colors'
           onClick={() => {
+            deleteQueryString(
+              ['stationID', 'stationAQI', 'sensorID', 'dateFrom', 'dateTo'],
+              router,
+              pathname,
+              searchParams
+            );
             setBookmark('favorites');
             setIsMarkerSelected(false);
             setSelectedStationID(null);
+            setSelectedPollutants([]);
+            setIsRaportActive(false);
           }}
         >
           <Image
             src='fav.svg'
-            alt='Ikonka lupy'
-            width={50}
-            height={50}
-            className='w-auto h-auto'
-          />
-        </div>
-      </Tooltip>
-      <Tooltip
-        content='Wyszukaj miejscowość'
-        showArrow={true}
-        placement='right'
-        offset={-12}
-        delay={0}
-        closeDelay={0}
-        classNames={{
-          content: [
-            'py-2 px-4',
-            'text-black rounded-2xl bg-blue3 font-medium text-xs',
-          ],
-        }}
-      >
-        <div
-          className='w-full h-20 hover:bg-blue0v2 hover:cursor-pointer flex justify-center content-center p-2 lg:p-4'
-          onClick={() => {
-            setBookmark('searching');
-            setIsMarkerSelected(false);
-            setSelectedStationID(null);
-          }}
-        >
-          <Image
-            src='searching.svg'
-            alt='Ikonka lupy'
+            alt='Ikonka pinezki lokalizacji z sercem'
             width={50}
             height={50}
             className='w-auto h-auto'

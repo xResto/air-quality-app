@@ -2,26 +2,32 @@
 'use client';
 import ChartComponent from './ChartComponent';
 import AQIranking from './AQIranking';
-import Searching from './Searching';
 import Loading from './Loading';
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { useArrowFlagContext } from '../store/arrowFlagContext';
 import { Tooltip } from '@nextui-org/react';
 import FavoriteStations from './FavoriteStations';
 import Skeleton from './Skeleton';
+import Raport from './Raport';
 
 const Sidebar = ({
   clickedStationID,
   clickedStationAQI,
+  sensorIDsData,
   sensorData,
   AQI,
   stations,
+  thisStation,
+  windData,
+  raport,
 }) => {
   const [AQItxt, setAQItxt] = useState('');
   const [airImage, setAirImage] = useState('');
   const [AQITextColor, setAQITextColor] = useState('text-white');
+  const [isStationAddedToFavorites, setIsStationAddedToFavorites] =
+    useState(null);
   const {
     isGoogleMapsLoaded,
     bookmark,
@@ -30,6 +36,8 @@ const Sidebar = ({
     setIsLoading,
     setCoordinate,
     setZoom,
+    isRaportActive,
+    setIsRaportActive,
   } = useArrowFlagContext();
 
   useEffect(() => {
@@ -40,9 +48,18 @@ const Sidebar = ({
   // const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const thisStation = stations.find(
-    (station) => station.id == clickedStationID
-  );
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedFavs = localStorage.getItem('favStations');
+      if (storedFavs) {
+        const favStations = JSON.parse(storedFavs);
+        const isFavorite = favStations.some(
+          (station) => station.id === clickedStationID
+        );
+        setIsStationAddedToFavorites(isFavorite);
+      }
+    }
+  }, [clickedStationID]);
 
   const handleZoomOnStation = () => {
     if (thisStation) {
@@ -61,16 +78,44 @@ const Sidebar = ({
   };
 
   const addStationToFavorites = () => {
-    
-  }
+    let favStations = JSON.parse(localStorage.getItem('favStations')) || [];
+    const stationIndex = favStations.findIndex(
+      (favStation) => favStation.id === clickedStationID
+    );
+
+    if (stationIndex > -1) {
+      favStations.splice(stationIndex, 1);
+      setIsStationAddedToFavorites(false);
+    } else {
+      favStations.push({
+        id: clickedStationID,
+        stationName: thisStation.stationName,
+      });
+      setIsStationAddedToFavorites(true);
+    }
+
+    if (favStations.length === 0) {
+      localStorage.removeItem('favStations');
+    } else {
+      localStorage.setItem('favStations', JSON.stringify(favStations));
+    }
+  };
 
   useEffect(() => {
-    if (searchParams.get('stationID') && searchParams.get('stationAQI')) {
+    if (searchParams.get('stationID') && !searchParams.get('sensorID')) {
       setBookmark('station');
-    } else {
-      setBookmark('ranking');
     }
   }, [searchParams, setBookmark]);
+
+  // useEffect(() => {
+  //   // Extract the current stationID from the URL search params
+  //   const currentStationID = searchParams.get('stationID');
+
+  //   // Compare with the new clickedStationID
+  //   if (clickedStationID && currentStationID !== clickedStationID.toString()) {
+  //     setBookmark('station');
+  //   }
+  // }, [clickedStationID, searchParams, setBookmark]);
 
   const AQIcolorPalette = {
     '-1': 'bg-[#808080]',
@@ -131,141 +176,174 @@ const Sidebar = ({
     }
   }, [clickedStationID]);
 
-  const getLatestSensorValues = (sensorData) => {
-    if (sensorData) {
-      setIsLoading(false);
-      return (
-        <ul>
-          {sensorData.map((sensor, index) => {
-            const key = sensor.key;
-            let latestNonNullValue = null;
-            let latestDate = null;
+  const getLatestSensorValues = () => {
+    setIsLoading(false);
+    return (
+      <>
+        <section className='flex justify-between'>
+          <ul>
+            {sensorData.map((sensor, index) => {
+              const key = sensor.key;
+              let latestNonNullValue = null;
+              let latestDate = null;
 
-            for (let i = 0; i < sensor.values.length; i++) {
-              const { date, value } = sensor.values[i];
-              if (value) {
-                const latestNumber = value.toFixed(1).slice(-1);
-                latestNonNullValue =
-                  latestNumber === 0 ? value.toFixed() : value.toFixed(1);
-                latestDate = date;
-                break;
+              for (let i = 0; i < sensor.values.length; i++) {
+                const { date, value } = sensor.values[i];
+                if (value) {
+                  const latestNumber = value.toFixed(1).slice(-1);
+                  latestNonNullValue =
+                    latestNumber === 0 ? value.toFixed() : value.toFixed(1);
+                  latestDate = date;
+                  break;
+                }
               }
-            }
 
-            const valuesArray = sensor.values.map((entry) => entry.value);
-            const maxSensorValue =
-              valuesArray.length > 0 ? Math.max(...valuesArray) : 0;
-            let colorRanges = [];
-            switch (key) {
-              case 'PM10':
-                colorRanges = [20, 50, 80, 110, 150, maxSensorValue + 1];
-                break;
-              case 'PM2.5':
-                colorRanges = [13, 35, 55, 75, 110, maxSensorValue + 1];
-                break;
-              case 'O3':
-                colorRanges = [70, 120, 150, 180, 240, maxSensorValue + 1];
-                break;
-              case 'NO2':
-                colorRanges = [40, 100, 150, 230, 400, maxSensorValue + 1];
-                break;
-              case 'SO2':
-                colorRanges = [50, 100, 200, 350, 500, maxSensorValue + 1];
-                break;
-              default:
-                colorRanges = [];
-            }
-
-            const colorPalette = [
-              '#108404',
-              '#18cc04',
-              '#f4f804',
-              '#ff7c04',
-              '#e00404',
-              '#98046c',
-            ];
-            const colorIndex = colorRanges.findIndex(
-              (range) => latestNonNullValue <= range
-            );
-            const color = colorPalette[colorIndex];
-
-            const supHandler = (key) => {
-              if (key === 'NO2' || key === 'SO2') {
-                return (
-                  <span>
-                    {key.slice(0, -1)}
-                    <sub>2</sub>
-                  </span>
-                );
-              } else if (key === 'C6H6') {
-                return (
-                  <span>
-                    C<sub>6</sub>H<sub>6</sub>
-                  </span>
-                );
-              } else {
-                return key;
+              const valuesArray = sensor.values.map((entry) => entry.value);
+              const maxSensorValue =
+                valuesArray.length > 0 ? Math.max(...valuesArray) : 0;
+              let colorRanges = [];
+              switch (key) {
+                case 'PM10':
+                  colorRanges = [20, 50, 80, 110, 150, maxSensorValue + 1];
+                  break;
+                case 'PM2.5':
+                  colorRanges = [13, 35, 55, 75, 110, maxSensorValue + 1];
+                  break;
+                case 'O3':
+                  colorRanges = [70, 120, 150, 180, 240, maxSensorValue + 1];
+                  break;
+                case 'NO2':
+                  colorRanges = [40, 100, 150, 230, 400, maxSensorValue + 1];
+                  break;
+                case 'SO2':
+                  colorRanges = [50, 100, 200, 350, 500, maxSensorValue + 1];
+                  break;
+                default:
+                  colorRanges = [];
               }
-            };
 
-            if (latestNonNullValue) {
-              return (
-                <li key={index} className='text-xl'>
-                  <div className='flex justify-between'>
-                    <div>
-                      <p className='text-xs font-extralight'>
-                        Pomiar z godz.: {latestDate.slice(-8, -3)}
-                      </p>
+              const colorPalette = [
+                '#108404',
+                '#18cc04',
+                '#f4f804',
+                '#ff7c04',
+                '#e00404',
+                '#98046c',
+              ];
+              const colorIndex = colorRanges.findIndex(
+                (range) => latestNonNullValue <= range
+              );
+              const color = colorPalette[colorIndex];
 
-                      <div
-                        key={latestNonNullValue.indexOf()}
-                        className='flex items-center mb-1'
-                      >
-                        <div>{supHandler(key)}:&nbsp;</div>
+              const supHandler = (key) => {
+                if (key === 'NO2' || key === 'SO2') {
+                  return (
+                    <span>
+                      {key.slice(0, -1)}
+                      <sub>2</sub>
+                    </span>
+                  );
+                } else if (key === 'C6H6') {
+                  return (
+                    <span>
+                      C<sub>6</sub>H<sub>6</sub>
+                    </span>
+                  );
+                } else {
+                  return key;
+                }
+              };
+
+              if (latestNonNullValue) {
+                return (
+                  <li key={index} className='text-xl'>
+                    <div className='flex justify-between'>
+                      <div>
+                        <p className='text-xs font-extralight'>
+                          Pomiar z godz.: {latestDate.slice(-8, -3)}
+                        </p>
+
                         <div
-                          className='font-bold text-2xl'
-                          style={{ color: color }}
+                          key={latestNonNullValue.indexOf()}
+                          className='flex items-center mb-1'
                         >
-                          {latestNonNullValue}
+                          <div>{supHandler(key)}:&nbsp;</div>
+                          <div
+                            className='font-bold text-2xl'
+                            style={{ color: color }}
+                          >
+                            {latestNonNullValue}
+                          </div>
+                          <span> &nbsp;&#181;g/m</span>
+                          <sup>3</sup>
                         </div>
-                        <span> &nbsp;&#181;g/m</span>
-                        <sup>3</sup>
                       </div>
                     </div>
-                  </div>
-                </li>
-              );
-            } else {
-              return;
-              // (
-              //   <div key={key}>
-              //     <p>No data found.</p>
-              //   </div>
-              // );
-            }
-          })}
-        </ul>
-      );
-    }
-    return null;
+                  </li>
+                );
+              } else {
+                return;
+              }
+            })}
+          </ul>
+          <div className='flex flex-col items-center'>
+            <span>Wiatr</span>
+            <span>
+              {(windData.speed * 3).toFixed()}
+              <span className='font-extralight'> km/h</span>
+            </span>
+            <Image
+              src='wind-arrow.svg'
+              alt='Strzałka wskazująca kierunek wiatru'
+              width={22}
+              height={22}
+              className='mt-1'
+              style={{ transform: `rotate(${windData.deg}deg)` }}
+            />
+          </div>
+        </section>
+        <button
+          className='border mt-[.58rem] border-blue2 self-center py-1 px-4 rounded-2xl text-center font-semibold text-base text-white hover:bg-blue2 transition-all'
+          onClick={() => {
+            setBookmark('raport');
+            setIsRaportActive(true);
+          }}
+        >
+          Generuj Raport Zanieczyszczeń
+        </button>
+        <ChartComponent sensorData={sensorData} />
+      </>
+    );
+    // return null;
   };
-
-  // let storageArr = JSON.parse(localStorage.getItem('stationID')) || [];
-  // storageArr.push(stationId);
-  // localStorage.setItem('stationID', JSON.stringify(storageArr));
-  // console.log(localStorage.getItem('stationID'));
 
   return (
     <>
-      <div className='flex md:w-80 lg:w-96 h-[100vh] border-r-[1px] border-blue2 text-white'>
-        <div className='flex flex-col md:w-80 lg:w-96 py-2 p-4 overflow-y-scroll sm:text-sm lg:text-base'>
+      <div
+        className={`flex ${
+          isRaportActive ? 'md:w-96 lg:w-full' : 'md:w-80 lg:w-[50rem]'
+        } h-[100vh] border-r-[1px] border-blue2 text-white`}
+      >
+        <div
+          className={`flex flex-col ${
+            isRaportActive ? 'md:w-96 lg:w-full' : 'md:w-80 lg:w-full'
+          } py-2 p-4 overflow-y-scroll sm:text-sm lg:text-base`}
+        >
           {isLoading && <Loading />}
           {bookmark === 'ranking' && !isGoogleMapsLoaded && <Skeleton />}
           {bookmark === 'ranking' && isGoogleMapsLoaded && !isLoading && (
             <AQIranking AQI={AQI} stations={stations} />
           )}
-          {bookmark === 'favorites' && !isLoading && <FavoriteStations />}
-          {bookmark === 'searching' && !isLoading && <Searching />}
+          {bookmark === 'favorites' && !isLoading && (
+            <FavoriteStations AQI={AQI} />
+          )}
+          {bookmark === 'raport' && !isLoading && (
+            <Raport
+              raport={raport}
+              sensorIDsData={sensorIDsData}
+              stationName={thisStation.stationName}
+            />
+          )}
           {!isLoading && bookmark === 'station' && sensorData && (
             <>
               <Image
@@ -298,15 +376,19 @@ const Sidebar = ({
                   <Image
                     src={'location-on-the-map.svg'}
                     alt='Pinezka lokalizacji na mapie'
-                    width={30}
-                    height={30}
-                    className='hover:cursor-pointer'
+                    width={32}
+                    height={32}
+                    className='hover:cursor-pointer transform hover:scale-110 transition-transform'
                     onClick={handleZoomOnStation}
                   />
                 </Tooltip>
                 <span className='text-center'>{thisStation.stationName}</span>
                 <Tooltip
-                  content='Dodaj stację do ulubionych'
+                  content={
+                    isStationAddedToFavorites
+                      ? 'Usuń z ulubionych'
+                      : 'Dodaj do ulubionych'
+                  }
                   showArrow={true}
                   placement='top'
                   offset={0}
@@ -319,29 +401,54 @@ const Sidebar = ({
                     ],
                   }}
                 >
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    xmlnsXlink='http://www.w3.org/1999/xlink'
-                    version='1.1'
-                    x='0px'
-                    y='0px'
-                    viewBox='0 0 109 109'
-                    enable-background='new 0 0 109 109'
-                    xmlSpace='preserve'
-                    width='30'
-                    height='30'
-                    fill='#38A3A5'
-                    className='hover:fill-red-500 hover:cursor-pointer'
-                    onClick={addStationToFavorites}
-                  >
-                    <path d='M54.561,93.792c-4.116,0-7.909-1.883-10.416-5.168L19.1,58.252c-0.142-0.167-0.298-0.355-0.453-0.55  l-0.192-0.231c-0.08-0.096-0.151-0.197-0.214-0.302c-3.311-4.369-5.059-9.557-5.059-15.023c0-13.75,11.187-24.938,24.937-24.938  c6.07,0,11.77,2.144,16.3,6.085c4.528-3.941,10.229-6.085,16.299-6.085c13.75,0,24.937,11.187,24.937,24.938  c0,5.631-1.84,10.944-5.325,15.378c-0.043,0.065-0.09,0.128-0.14,0.19l-0.127,0.157c-0.001,0.001-0.068,0.083-0.069,0.085  l-0.151,0.182L64.951,88.651C62.502,91.892,58.694,93.792,54.561,93.792z M22.492,54.506l0.041,0.05  c0.154,0.193,0.277,0.341,0.405,0.492l25.097,30.433c0.022,0.027,0.044,0.054,0.065,0.082c1.552,2.052,3.908,3.229,6.461,3.229  c2.553,0,4.907-1.177,6.459-3.229l24.994-30.641l0.027,0.019c0.024-0.044,0.049-0.087,0.076-0.129l-0.007-0.006l0.051-0.062  c0.038-0.055,0.077-0.109,0.119-0.162c2.861-3.575,4.373-7.875,4.373-12.436c0-10.994-8.943-19.938-19.937-19.938  c-5.523,0-10.667,2.225-14.481,6.264c-0.944,1-2.689,1-3.635,0c-3.816-4.039-8.959-6.264-14.482-6.264  c-10.993,0-19.937,8.944-19.937,19.938c0,4.447,1.45,8.666,4.194,12.199C22.417,54.397,22.456,54.451,22.492,54.506z M86.274,42.218  c0-8.779-7.142-15.921-15.921-15.921c-1.381,0-2.5,1.119-2.5,2.5s1.119,2.5,2.5,2.5c6.022,0,10.921,4.899,10.921,10.921  c0,1.381,1.119,2.5,2.5,2.5S86.274,43.599,86.274,42.218z M81.563,47.67c-1.697,0-3.074,1.377-3.074,3.074  c0,1.698,1.377,3.076,3.074,3.076s3.076-1.378,3.076-3.076C84.639,49.047,83.26,47.67,81.563,47.67z' />
-                  </svg>
+                  {isStationAddedToFavorites ? (
+                    <svg
+                      xmlnsDc='http://purl.org/dc/elements/1.1/'
+                      xmlnsCc='http://creativecommons.org/ns#'
+                      xmlnsRdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+                      xmlnsSvg='http://www.w3.org/2000/svg'
+                      xmlns='http://www.w3.org/2000/svg'
+                      xmlnsSodipodi='http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd'
+                      xmlnsInkscape='http://www.inkscape.org/namespaces/inkscape'
+                      version='1.1'
+                      x='0px'
+                      y='0px'
+                      viewBox='0 0 100 100'
+                      fill='#dc2626'
+                      xmlSpace='preserve'
+                      className='w-8 h-8 hover:fill-[#808080] hover:stroke-[#808080] hover:cursor-pointer transform hover:scale-110 transition-all'
+                      onClick={addStationToFavorites}
+                    >
+                      <path d='M 30,13 C 16.4602,13 8,23.94921 8,37.437501 8,58.448443 32.72039,79.898651 50,87.000001 67.27961,79.898651 92,58.448443 92,37.437501 92,23.94921 83.5398,13 70,13 61.92302,13 55,18.000001 50,24.000001 45,18.000001 38.076977,13 30,13 z' />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlnsDc='http://purl.org/dc/elements/1.1/'
+                      xmlnsCc='http://creativecommons.org/ns#'
+                      xmlnsRdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+                      xmlnsSvg='http://www.w3.org/2000/svg'
+                      xmlns='http://www.w3.org/2000/svg'
+                      xmlnsSodipodi='http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd'
+                      xmlnsInkscape='http://www.inkscape.org/namespaces/inkscape'
+                      version='1.1'
+                      x='0px'
+                      y='0px'
+                      viewBox='0 0 100 100'
+                      fill='#38A3A5'
+                      stroke='#38A3A5'
+                      strokeWidth='3'
+                      xmlSpace='preserve'
+                      className='w-8 h-8 hover:fill-red-500 hover:stroke-red-600 hover:cursor-pointer transform hover:scale-110 transition-all'
+                      onClick={addStationToFavorites}
+                    >
+                      <path d='M 30,12 C 22.960544,12 17.141327,14.870392 13.15625,19.5 9.1711726,24.129608 7,30.484279 7,37.4375 7,48.335154 13.337583,59.138127 21.78125,68.125 30.224917,77.111873 40.812845,84.315995 49.625,87.9375 a 1.0001,1.0001 0 0 0 0.75,0 C 59.187155,84.315995 69.775083,77.111873 78.21875,68.125 86.662417,59.138127 93,48.335154 93,37.4375 93,30.484279 90.828827,24.129608 86.84375,19.5 82.858673,14.870392 77.039456,12 70,12 61.903947,12 55.058072,16.798266 50,22.5625 44.941928,16.798265 38.09605,12 30,12 z m 0,2 c 7.664281,0 14.33446,4.763852 19.21875,10.625 a 1.0001,1.0001 0 0 0 1.5625,0 C 55.66554,18.763852 62.335716,14 70,14 76.500344,14 81.682527,16.59543 85.3125,20.8125 88.942473,25.02957 91,30.90243 91,37.4375 91,47.550788 84.98643,57.983696 76.75,66.75 68.630113,75.392263 58.401501,82.344364 50,85.875 41.598499,82.344364 31.369887,75.392263 23.25,66.75 15.01357,57.983696 9,47.550788 9,37.4375 9,30.90243 11.057527,25.02957 14.6875,20.8125 18.317473,16.59543 23.499656,14 30,14 z' />
+                    </svg>
+                  )}
                 </Tooltip>
               </div>
               <span className='border border-blue2 mb-3'></span>
 
-              {getLatestSensorValues(sensorData)}
-              <ChartComponent sensorData={sensorData} />
+              {sensorData && getLatestSensorValues()}
             </>
           )}
         </div>

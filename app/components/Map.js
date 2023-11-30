@@ -1,10 +1,12 @@
 'use client';
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useArrowFlagContext } from '../store/arrowFlagContext';
 import Image from 'next/image';
 import Loading from './Loading';
+import { createQueryString } from '../utils/queryString';
+import { deleteQueryString } from '../utils/queryString';
 
 function MapComponent(props) {
   const {
@@ -15,15 +17,17 @@ function MapComponent(props) {
     selectedStationID,
     setCoordinate,
     setZoom,
+    setBookmark,
     setIsLoading,
     setIsMarkerSelected,
     setSelectedStationID,
     setIsGoogleMapsLoaded,
+    setSelectedPollutants,
+    setIsRaportActive,
   } = useArrowFlagContext();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  // const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
 
   const colorPalette = [
     'bg-[#108404]',
@@ -33,17 +37,6 @@ function MapComponent(props) {
     'bg-[#e00404]',
     'bg-[#98046c]',
   ];
-
-  const createQueryString = useCallback(
-    (name1, value1, name2, value2) => {
-      const params = new URLSearchParams(searchParams);
-      params.set(name1, value1); // stationID
-      params.set(name2, value2); // stationAQI
-
-      return params.toString();
-    },
-    [searchParams]
-  );
 
   const handleLoad = () => {
     setIsGoogleMapsLoaded(true);
@@ -82,16 +75,27 @@ function MapComponent(props) {
         searchParams.get('stationID') !== stationId.toString() &&
         userClosestStation !== stationId.toString()
       ) {
-        setSelectedStationID(stationId);
-        setIsMarkerSelected(true);
         setIsLoading(true);
-        const queryString = createQueryString(
-          'stationID',
-          stationId,
-          'stationAQI',
-          stationAQI
+        setIsMarkerSelected(true);
+        setSelectedStationID(stationId);
+        setBookmark('station');
+        setSelectedPollutants([]);
+        setIsRaportActive(false);
+
+        const params = new URLSearchParams(searchParams);
+        ['sensorID', 'dateFrom', 'dateTo'].forEach((param) =>
+          params.delete(param)
         );
-        router.push(`${pathname}?${queryString}`, {
+
+        // deleteQueryString(
+        //   ['sensorID', 'dateFrom', 'dateTo'],
+        //   router,
+        //   pathname,
+        //   searchParams
+        // );
+        params.set('stationID', stationId);
+        params.set('stationAQI', stationAQI);
+        router.push(`${pathname}?${params.toString()}`, {
           scroll: false,
         });
       } else {
@@ -105,6 +109,7 @@ function MapComponent(props) {
       router,
       pathname,
       createQueryString,
+      deleteQueryString,
     ]
   );
 

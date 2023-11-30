@@ -18,7 +18,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang='en' className={montserrat.variable}>
       <body>
-        <ArrowFlagContextProvider>{children}</ArrowFlagContextProvider>
+          <ArrowFlagContextProvider>{children}</ArrowFlagContextProvider>
       </body>
     </html>
   );

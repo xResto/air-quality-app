@@ -16,6 +16,8 @@ export default function ArrowFlagContextProvider({ children }) {
   const [isMarkerSelected, setIsMarkerSelected] = useState(false);
   const [selectedStationID, setSelectedStationID] = useState(null);
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
+  const [selectedPollutants, setSelectedPollutants] = useState([]);
+  const [isRaportActive, setIsRaportActive] = useState(false);
 
   return (
     <ArrowFlagContext.Provider
@@ -36,6 +38,10 @@ export default function ArrowFlagContextProvider({ children }) {
         setSelectedStationID,
         isGoogleMapsLoaded,
         setIsGoogleMapsLoaded,
+        selectedPollutants,
+        setSelectedPollutants,
+        isRaportActive,
+        setIsRaportActive,
       }}
     >
       {children}
