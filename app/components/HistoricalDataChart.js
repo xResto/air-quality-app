@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -8,6 +10,7 @@ import {
   Title,
   Tooltip,
 } from 'chart.js';
+import { useArrowFlagContext } from '../store/arrowFlagContext';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 
@@ -17,6 +20,7 @@ const HistoricalDataChart = ({
   selectedDateFrom,
   selectedDateTo,
 }) => {
+  const { selectedPollutants } = useArrowFlagContext();
   const getPollutantCode = (stationCode) => {
     const sensor = sensorIDsData.find((s) =>
       stationCode.includes(s.param.paramCode)
@@ -137,6 +141,16 @@ const HistoricalDataChart = ({
     <div>
       {raport.map((sensorData, index) => {
         const data = processData(sensorData);
+        const pollutantName = selectedPollutants[index] || 'Unknown pollutant';
+
+        if (!data) {
+          // If there is no data, display the pollutant name with the error message
+          return (
+            <div key={index}>
+              <p>{`Przepraszamy, nie można zwrócić danych dla ${pollutantName}. Zbyt wiele zapytań w jednostce czasu.`}</p>
+            </div>
+          );
+        }
         return (
           <div key={index}>
             <Bar
@@ -166,14 +180,14 @@ const HistoricalDataChart = ({
               <p>{data.formattedDates.latestDate}</p>
               <p>{data.formattedDates.oldestDate}</p>
             </div>
-            <ul>
+            {/* <ul>
               <li>Bardzo dobra: {data.airQualityCounts.veryGood}</li>
               <li>Dobra: {data.airQualityCounts.good}</li>
               <li>Umiarkowana: {data.airQualityCounts.moderate}</li>
               <li>Niezadowalająca: {data.airQualityCounts.poor}</li>
               <li>Zła: {data.airQualityCounts.bad}</li>
               <li>Bardzo zła: {data.airQualityCounts.veryBad}</li>
-            </ul>
+            </ul> */}
           </div>
         );
       })}

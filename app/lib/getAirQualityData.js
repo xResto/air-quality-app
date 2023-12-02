@@ -158,7 +158,7 @@ export const generateRaport = async (sensorIDString, dateFrom, dateTo) => {
   try {
     // Check if sensorIDString is valid and not empty
     if (!sensorIDString || sensorIDString.length === 0) {
-      return [];
+      return '';
     }
 
     // Split the sensorID string into an array of IDs
@@ -176,8 +176,16 @@ export const generateRaport = async (sensorIDString, dateFrom, dateTo) => {
           // { cache: 'no-store' }
         );
         const data = await res.json();
-        allData = allData.concat(data['Lista archiwalnych wyników pomiarów']);
-        totalPages = data.totalPages;
+
+        if (data.error_code) {
+          // allData = data.error_result;
+          console.log('error za szybko');
+        }
+        if (!data.error_code) {
+          allData = allData.concat(data['Lista archiwalnych wyników pomiarów']);
+          totalPages = data.totalPages;
+        }
+
         page++;
       } while (page < totalPages);
 
