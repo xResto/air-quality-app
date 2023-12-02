@@ -20,7 +20,7 @@ const Sidebar = ({
   AQI,
   stations,
   thisStation,
-  windData,
+  // windData,
   raport,
 }) => {
   const [AQItxt, setAQItxt] = useState('');
@@ -286,7 +286,7 @@ const Sidebar = ({
               }
             })}
           </ul>
-          <div className='flex flex-col items-center'>
+          {/* <div className='flex flex-col items-center'>
             <span>Wiatr</span>
             <span>
               {(windData.speed * 3).toFixed()}
@@ -300,7 +300,7 @@ const Sidebar = ({
               className='mt-1'
               style={{ transform: `rotate(${windData.deg}deg)` }}
             />
-          </div>
+          </div> */}
         </section>
         <button
           className='border mt-[.58rem] border-blue2 self-center py-1 px-4 rounded-2xl text-center font-semibold text-base text-white hover:bg-blue2 transition-all'

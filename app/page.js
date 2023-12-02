@@ -28,9 +28,9 @@ export default async function Page({ searchParams }) {
   const { sensorIDsData, sensorIDs } =
     (await getSensorID(clickedStationID)) || {};
   const sensorData = await getSensorData(sensorIDs);
-  const windData = thisStation
-    ? await getWindData(thisStation.gegrLat, thisStation.gegrLon)
-    : null;
+  // const windData = thisStation
+  //   ? await getWindData(thisStation.gegrLat, thisStation.gegrLon)
+  //   : null;
 
   // Raport
   const sensorQueryID = searchParams?.sensorID ?? '';
@@ -50,7 +50,7 @@ export default async function Page({ searchParams }) {
         AQI={AQI}
         stations={stations}
         thisStation={thisStation}
-        windData={windData}
+        // windData={windData}
         raport={raport}
         sensorIDsData={sensorIDsData}
       />
