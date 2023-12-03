@@ -34,7 +34,7 @@ const Display = ({
           sensorIDsData={sensorIDsData}
         />
       </div>
-      <div className='flex flex-col flex-grow h-screen'>
+      <div className='flex flex-col flex-grow h-[100svh]'>
         <div className={`sm:hidden overflow-auto ${isSidebarOpen ? '' : 'hidden'}`}>
           <Sidebar
             clickedStationID={clickedStationID}
