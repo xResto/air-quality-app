@@ -2,6 +2,7 @@ import React from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { createQueryString } from '../utils/queryString';
 import { useArrowFlagContext } from '../store/arrowFlagContext';
+import { deleteQueryString } from '../utils/queryString';
 
 const FavoriteStation = ({ index, station, stationAQI }) => {
   const {
@@ -9,6 +10,8 @@ const FavoriteStation = ({ index, station, stationAQI }) => {
     setSelectedStationID,
     setBookmark,
     setIsLoading,
+    setIsSidebarOpen,
+    setIsRaportActive,
   } = useArrowFlagContext();
   const router = useRouter();
   const pathname = usePathname();
@@ -66,7 +69,25 @@ const FavoriteStation = ({ index, station, stationAQI }) => {
   }
 
   return (
-    <div key={index}>
+    <div>
+      <button
+        className='sm:hidden absolute top-2 right-5'
+        onClick={() => {
+          deleteQueryString(
+            ['stationID', 'stationAQI', 'sensorID', 'dateFrom', 'dateTo'],
+            router,
+            pathname,
+            searchParams
+          );
+          setIsSidebarOpen(false);
+          setIsMarkerSelected(false);
+          setSelectedStationID(null);
+          setIsRaportActive(false);
+          setBookmark('ranking');
+        }}
+      >
+        X
+      </button>
       <li
         className={`flex flex-col items-center text-center p-1 mb-1 rounded-2xl ${AQIcolor} hover:cursor-pointer transform hover:scale-[1.035] transition-transform`}
         href={`/${station.id}`}

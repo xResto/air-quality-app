@@ -125,7 +125,7 @@ const ChartComponent = ({ sensorData }) => {
             }}
             data={data.data}
           />
-          <div className='flex justify-between text-xs'>
+          <div className='flex justify-between text-xs mb-2'>
             <p>{data.latestDate}</p>
             <p>{data.middleDate}</p>
             <p>{data.oldestDate}</p>

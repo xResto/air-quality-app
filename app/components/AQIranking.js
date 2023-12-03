@@ -3,6 +3,7 @@ import React from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useArrowFlagContext } from '../store/arrowFlagContext';
 import { createQueryString } from '../utils/queryString';
+import { deleteQueryString } from '../utils/queryString';
 
 const AQIranking = ({ AQI, stations }) => {
   const {
@@ -10,6 +11,10 @@ const AQIranking = ({ AQI, stations }) => {
     setIsLoading,
     setIsMarkerSelected,
     setSelectedStationID,
+    setIsSidebarOpen,
+    setIsRaportActive,
+    isMobileRankingOpen,
+    setIsMobileRankingOpen,
   } = useArrowFlagContext();
   const router = useRouter();
   const pathname = usePathname();
@@ -112,13 +117,32 @@ const AQIranking = ({ AQI, stations }) => {
   };
 
   return (
-    <>
+    <div className={`${isMobileRankingOpen ? 'block' : 'hidden sm:block'}`}>
       <div className='flex justify-center text-2xl font-semibold text-center mb-2'>
         Ranking jakości powietrza
       </div>
-      <span className='border border-blue2 mb-2'></span>
+      <button
+        className='sm:hidden absolute top-2 right-5'
+        onClick={() => {
+          deleteQueryString(
+            ['stationID', 'stationAQI', 'sensorID', 'dateFrom', 'dateTo'],
+            router,
+            pathname,
+            searchParams
+          );
+          setIsMobileRankingOpen(false);
+          setIsSidebarOpen(false);
+          setIsMarkerSelected(false);
+          setSelectedStationID(null);
+          setIsRaportActive(false);
+          setBookmark('ranking');
+        }}
+      >
+        X
+      </button>
+      <span className='border border-blue2 mb-2 block'></span>
       <ul>{rank()}</ul>
-    </>
+    </div>
   );
 };
 

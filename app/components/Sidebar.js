@@ -11,6 +11,7 @@ import { Tooltip } from '@nextui-org/react';
 import FavoriteStations from './FavoriteStations';
 import Skeleton from './Skeleton';
 import Raport from './Raport';
+import { deleteQueryString } from '../utils/queryString';
 
 const Sidebar = ({
   clickedStationID,
@@ -38,14 +39,20 @@ const Sidebar = ({
     setZoom,
     isRaportActive,
     setIsRaportActive,
+    isSidebarOpen,
+    setIsSidebarOpen,
+    setIsMarkerSelected,
+    setSelectedStationID,
+    setSelectedPollutants,
+    isMobileRankingOpen,
   } = useArrowFlagContext();
 
   useEffect(() => {
     setIsLoading(false);
   }, [clickedStationID]);
 
-  // const router = useRouter();
-  // const pathname = usePathname();
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -320,14 +327,16 @@ const Sidebar = ({
   return (
     <>
       <div
-        className={`flex ${
-          isRaportActive ? 'md:w-96 lg:w-full' : 'md:w-80 lg:w-[50rem]'
-        } h-[100vh] border-r-[1px] border-blue2 text-white`}
+        className={`relative flex h-screen sm:overflow-y-auto sm:overflow-x-hidden sm:border-r-[1px] sm:border-blue2 text-white ${
+          isRaportActive
+            ? 'md:w-96 lg:w-full'
+            : 'sm:w-80 md:w-96 lg:w-[28rem] xl:w-[34rem]'
+        }  ${isSidebarOpen ? 'block' : 'hidden sm:flex'} }`}
       >
         <div
           className={`flex flex-col ${
-            isRaportActive ? 'md:w-96 lg:w-full' : 'md:w-80 lg:w-full'
-          } py-2 p-4 overflow-y-scroll sm:text-sm lg:text-base`}
+            isRaportActive ? 'md:w-96 lg:w-full' : 'w-full sm:w-80 md:w-full'
+          } py-2 p-4 sm:text-sm lg:text-base`}
         >
           {isLoading && <Loading />}
           {bookmark === 'ranking' && !isGoogleMapsLoaded && <Skeleton />}
@@ -346,6 +355,30 @@ const Sidebar = ({
           )}
           {!isLoading && bookmark === 'station' && sensorData && (
             <>
+                <button
+                  className='sm:hidden absolute top-2 right-5'
+                  onClick={() => {
+                    deleteQueryString(
+                      [
+                        'stationID',
+                        'stationAQI',
+                        'sensorID',
+                        'dateFrom',
+                        'dateTo',
+                      ],
+                      router,
+                      pathname,
+                      searchParams
+                    );
+                    setIsSidebarOpen(false);
+                    setIsMarkerSelected(false);
+                    setSelectedStationID(null);
+                    setIsRaportActive(false);
+                    setBookmark('ranking');
+                  }}
+                >
+                  X
+                </button>
               <Image
                 src={airImage}
                 alt='Zdjęcie odzwierciedlające jakość powietrza'

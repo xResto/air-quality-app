@@ -18,6 +18,9 @@ const Navigation = ({ stations, AQI }) => {
     setSelectedStationID,
     setSelectedPollutants,
     setIsRaportActive,
+    setIsMobileRankingOpen,
+    setIsSidebarOpen,
+    isSidebarOpen,
   } = useArrowFlagContext();
   const router = useRouter();
   const pathname = usePathname();
@@ -76,6 +79,7 @@ const Navigation = ({ stations, AQI }) => {
           setSelectedStationID(stationID);
           setSelectedPollutants([]);
           setIsRaportActive(false);
+          setIsSidebarOpen(true);
           const params = new URLSearchParams(searchParams);
           ['sensorID', 'dateFrom', 'dateTo'].forEach((param) =>
             params.delete(param)
@@ -133,7 +137,13 @@ const Navigation = ({ stations, AQI }) => {
   };
 
   return (
-    <div className='flex flex-col items-center h-full flex-shrink-0 md:w-14 lg:w-20 border-r-[1px] border-blue2'>
+    <div
+      className={`flex sm:flex-col sm:justify-start justify-around sm:h-full w-full sm:w-14 lg:w-20 border-t-1 sm:border-r-1 border-blue2 sm:static sm:border-0 bg-blue0 ${
+        isSidebarOpen ? '' : ''
+      }`}
+    >
+      {/* <div className='w-full fixed bottom-0 sm:relative sm:flex sm:flex-col sm:items-center sm:h-full sm:w-14 lg:w-20 sm:border-r border-blue2 bg-blue0 z-10'> */}
+      {/* Desktop ranking icon */}
       <Tooltip
         content='Ranking jakości powietrza'
         showArrow={true}
@@ -149,7 +159,7 @@ const Navigation = ({ stations, AQI }) => {
         }}
       >
         <div
-          className='w-full h-20 flex justify-center content-center p-2 lg:p-4 hover:bg-blue0v2 hover:cursor-pointer transition-colors'
+          className='w-full h-10 sm:h-20 hidden sm:flex justify-center content-center p-2 lg:p-4 hover:bg-blue0v2 hover:cursor-pointer transition-colors'
           onClick={() => {
             deleteQueryString(
               ['stationID', 'stationAQI', 'sensorID', 'dateFrom', 'dateTo'],
@@ -162,6 +172,49 @@ const Navigation = ({ stations, AQI }) => {
             setSelectedStationID(null);
             setSelectedPollutants([]);
             setIsRaportActive(false);
+            setIsSidebarOpen(false);
+          }}
+        >
+          <Image
+            src='rank.svg'
+            alt='Ikonka podium'
+            width={50}
+            height={50}
+            onMouseOver={() => {}}
+            className='w-auto h-auto'
+          />
+        </div>
+      </Tooltip>
+      <Tooltip
+        content='Ranking jakości powietrza'
+        showArrow={true}
+        placement='right'
+        offset={-12}
+        delay={0}
+        closeDelay={0}
+        classNames={{
+          content: [
+            'py-2 px-4',
+            'text-black rounded-2xl bg-blue3 font-medium text-xs',
+          ],
+        }}
+      >
+        <div
+          className='w-full h-20 flex sm:hidden justify-center content-center p-2 lg:p-4 hover:bg-blue0v2 hover:cursor-pointer transition-colors'
+          onClick={() => {
+            deleteQueryString(
+              ['stationID', 'stationAQI', 'sensorID', 'dateFrom', 'dateTo'],
+              router,
+              pathname,
+              searchParams
+            );
+            setBookmark('ranking');
+            setIsMarkerSelected(false);
+            setSelectedStationID(null);
+            setSelectedPollutants([]);
+            setIsRaportActive(false);
+            setIsMobileRankingOpen(true);
+            setIsSidebarOpen(true);
           }}
         >
           <Image
@@ -229,6 +282,7 @@ const Navigation = ({ stations, AQI }) => {
             setSelectedStationID(null);
             setSelectedPollutants([]);
             setIsRaportActive(false);
+            setIsSidebarOpen(true);
           }}
         >
           <Image

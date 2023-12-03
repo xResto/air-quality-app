@@ -7,7 +7,7 @@ const ArrowFlagContext = createContext(null);
 export default function ArrowFlagContextProvider({ children }) {
   const [coordinate, setCoordinate] = useState({
     lat: 52.077,
-    lng: 18.8,
+    lng: 19,
   });
   const [zoom, setZoom] = useState(7);
   const [bookmark, setBookmark] = useState('ranking');
@@ -18,6 +18,8 @@ export default function ArrowFlagContextProvider({ children }) {
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
   const [selectedPollutants, setSelectedPollutants] = useState([]);
   const [isRaportActive, setIsRaportActive] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobileRankingOpen, setIsMobileRankingOpen] = useState(false);
 
   return (
     <ArrowFlagContext.Provider
@@ -42,6 +44,10 @@ export default function ArrowFlagContextProvider({ children }) {
         setSelectedPollutants,
         isRaportActive,
         setIsRaportActive,
+        isSidebarOpen,
+        setIsSidebarOpen,
+        isMobileRankingOpen,
+        setIsMobileRankingOpen,
       }}
     >
       {children}

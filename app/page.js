@@ -1,7 +1,4 @@
 import React from 'react';
-import Sidebar from './components/Sidebar';
-import Navigation from './components/Navigation';
-import MapComponent from './components/Map';
 import {
   getAllStations,
   getAqiData,
@@ -10,6 +7,7 @@ import {
   generateRaport,
 } from './lib/getAirQualityData';
 import { getWindData } from './lib/getWindData';
+import Display from './components/Display';
 
 // export const dynamic = 'force-dynamic';
 
@@ -41,24 +39,42 @@ export default async function Page({ searchParams }) {
   console.log(raport);
 
   return (
-    <div className='bg-blue0 flex h-full'>
-      <Navigation stations={stations} AQI={AQI} />
-      <Sidebar
-        clickedStationID={clickedStationID}
-        clickedStationAQI={clickedStationAQI}
-        sensorData={sensorData}
-        AQI={AQI}
-        stations={stations}
-        thisStation={thisStation}
-        // windData={windData}
-        raport={raport}
-        sensorIDsData={sensorIDsData}
-      />
-      <MapComponent
-        stations={stations}
-        AQI={AQI}
-        clickedStationID={clickedStationID}
-      />
-    </div>
+    // <div className='bg-blue0 sm:flex sm:h-full'>
+    //   <div className='hidden sm:block'>
+    //     <Navigation stations={stations} AQI={AQI} />
+    //   </div>
+    //   <Sidebar
+    //     clickedStationID={clickedStationID}
+    //     clickedStationAQI={clickedStationAQI}
+    //     sensorData={sensorData}
+    //     AQI={AQI}
+    //     stations={stations}
+    //     thisStation={thisStation}
+    //     // windData={windData}
+    //     raport={raport}
+    //     sensorIDsData={sensorIDsData}
+    //   />
+    //   <div className='flex flex-col sm:flex-grow h-screen'>
+    //     <MapComponent
+    //       stations={stations}
+    //       AQI={AQI}
+    //       clickedStationID={clickedStationID}
+    //     />
+    //     <div className='sm:hidden'>
+    //       <Navigation stations={stations} AQI={AQI} />
+    //     </div>
+    //   </div>
+    // </div>
+    <Display
+      clickedStationID={clickedStationID}
+      clickedStationAQI={clickedStationAQI}
+      sensorData={sensorData}
+      AQI={AQI}
+      stations={stations}
+      thisStation={thisStation}
+      // windData={windData}
+      raport={raport}
+      sensorIDsData={sensorIDsData}
+    />
   );
 }
