@@ -17,6 +17,7 @@
     "@mui/x-date-pickers": "^6.18.2",
     "@nextui-org/react": "^2.2.9",
     "@react-google-maps/api": "^2.19.2",
+    "@vercel/speed-insights": "^1.0.1",
     "@vis.gl/react-google-maps": "^0.3.3",
     "autoprefixer": "10.4.15",
     "chart.js": "^4.4.0",

@@ -2,7 +2,7 @@ import './globals.css';
 
 import { Montserrat } from 'next/font/google';
 import MainContextProvider from './store/MainContext';
-// import { NextUIProviderWrapper } from './store/providers';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -19,9 +19,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang='en' className={montserrat.variable}>
       <body>
-        {/* <NextUIProviderWrapper> */}
-          <MainContextProvider>{children}</MainContextProvider>
-        {/* </NextUIProviderWrapper> */}
+        <MainContextProvider>{children}</MainContextProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
