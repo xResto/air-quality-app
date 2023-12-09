@@ -1,27 +1,29 @@
-// components/Sidebar.js
+
 'use client';
-import ChartComponent from './ChartComponent';
-import AQIranking from './AQIranking';
-import Loading from './Loading';
+import ChartComponent from '../ChartComponent';
+import AQIranking from '../AQIRanking/AQIranking';
+import Loading from '../Loading';
 import React, { useState, useEffect } from 'react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { useArrowFlagContext } from '../store/arrowFlagContext';
+import { useMainContext } from '../../store/MainContext';
 import { Tooltip } from '@nextui-org/react';
-import FavoriteStations from './FavoriteStations';
-import Skeleton from './Skeleton';
-import Raport from './Raport';
-import { deleteQueryString } from '../utils/queryString';
+import FavoriteStations from '../FavoriteStations/FavoriteStations';
+import Skeleton from '../Skeleton';
+import Raport from '../Raport';
+import WindComponent from './WeatherComponent';
+import CloseButtonMobile from './CloseButtonMobile';
+import Credits from '../Credits';
+import Link from 'next/link';
 
 const Sidebar = ({
   clickedStationID,
-  clickedStationAQI,
   sensorIDsData,
   sensorData,
   AQI,
   stations,
   thisStation,
-  // windData,
+  // weatherData,
   raport,
 }) => {
   const [AQItxt, setAQItxt] = useState('');
@@ -41,21 +43,15 @@ const Sidebar = ({
     setIsRaportActive,
     isSidebarOpen,
     setIsSidebarOpen,
-    setIsMarkerSelected,
-    setSelectedStationID,
-    setSelectedPollutants,
-    isMobileRankingOpen,
-  } = useArrowFlagContext();
+  } = useMainContext();
 
-  useEffect(() => {
-    setIsLoading(false);
-  }, [clickedStationID]);
+  const [aqiBackgroundClass, setAqiBackgroundClass] = useState('');
 
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    setIsLoading(false);
+
     if (typeof window !== 'undefined') {
       const storedFavs = localStorage.getItem('favStations');
       if (storedFavs) {
@@ -66,7 +62,13 @@ const Sidebar = ({
         setIsStationAddedToFavorites(isFavorite);
       }
     }
-  }, [clickedStationID]);
+  }, [clickedStationID, AQI]);
+
+  useEffect(() => {
+    if (searchParams.get('stationID') && !searchParams.get('sensorID')) {
+      setBookmark('station');
+    }
+  }, [searchParams, setBookmark]);
 
   const handleZoomOnStation = () => {
     if (thisStation) {
@@ -81,8 +83,75 @@ const Sidebar = ({
             : prev.lng + 0.000001,
       }));
       setZoom(11);
+      setIsSidebarOpen(false);
     }
   };
+
+  const AQIcolorPalette = {
+    '-1': 'bg-[#808080]',
+    0: 'bg-[#108404]',
+    1: 'bg-[#18cc04]',
+    2: 'bg-[#f4f804]',
+    3: 'bg-[#ff7c04]',
+    4: 'bg-[#e00404]',
+    5: 'bg-[#98046c]',
+  };
+
+  useEffect(() => {
+    const stationEntry = AQI.find((entry) => entry.id === +clickedStationID);
+    let clickedStationAQI;
+    if (stationEntry) {
+      clickedStationAQI = stationEntry.stIndexLevel.id;
+    }
+
+    if (clickedStationAQI !== null) {
+      const imgHelper = 'aqi-image-';
+      const helperTxt = 'jakość powietrza';
+
+      setAqiBackgroundClass(
+        AQIcolorPalette[clickedStationAQI] || 'bg-transparent'
+      );
+
+      setAQITextColor(
+        clickedStationAQI === 0 ||
+          clickedStationAQI === 4 ||
+          clickedStationAQI === 5
+          ? 'text-white'
+          : 'text-black'
+      );
+
+      switch (clickedStationAQI) {
+        case -1:
+          setAQItxt('Brak indeksu');
+          setAirImage(`${imgHelper}-1.svg`);
+          break;
+        case 0:
+          setAQItxt(`Bardzo dobra ${helperTxt}`);
+          setAirImage(`${imgHelper}0.svg`);
+          break;
+        case 1:
+          setAQItxt(`Dobra ${helperTxt}`);
+          setAirImage(`${imgHelper}1.svg`);
+          break;
+        case 2:
+          setAQItxt(`Umiarkowana ${helperTxt}`);
+          setAirImage(`${imgHelper}2.svg`);
+          break;
+        case 3:
+          setAQItxt(`Niezadowalająca ${helperTxt}`);
+          setAirImage(`${imgHelper}3.svg`);
+          break;
+        case 4:
+          setAQItxt(`Zła ${helperTxt}`);
+          setAirImage(`${imgHelper}4.svg`);
+          break;
+        case 5:
+          setAQItxt(`Bardzo zła ${helperTxt}`);
+          setAirImage(`${imgHelper}5.svg`);
+          break;
+      }
+    }
+  }, [clickedStationID]);
 
   const addStationToFavorites = () => {
     let favStations = JSON.parse(localStorage.getItem('favStations')) || [];
@@ -108,85 +177,20 @@ const Sidebar = ({
     }
   };
 
-  useEffect(() => {
-    if (searchParams.get('stationID') && !searchParams.get('sensorID')) {
-      setBookmark('station');
-    }
-  }, [searchParams, setBookmark]);
-
-  // useEffect(() => {
-  //   // Extract the current stationID from the URL search params
-  //   const currentStationID = searchParams.get('stationID');
-
-  //   // Compare with the new clickedStationID
-  //   if (clickedStationID && currentStationID !== clickedStationID.toString()) {
-  //     setBookmark('station');
-  //   }
-  // }, [clickedStationID, searchParams, setBookmark]);
-
-  const AQIcolorPalette = {
-    '-1': 'bg-[#808080]',
-    0: 'bg-[#108404]',
-    1: 'bg-[#18cc04]',
-    2: 'bg-[#f4f804]',
-    3: 'bg-[#ff7c04]',
-    4: 'bg-[#e00404]',
-    5: 'bg-[#98046c]',
-  };
-
-  const aqiBackgroundClass =
-    AQIcolorPalette[clickedStationAQI] || 'bg-transparent';
-
-  useEffect(() => {
-    if (clickedStationAQI !== null) {
-      const imgHelper = 'aqi-image-';
-      const helperTxt = 'jakość powietrza';
-
-      setAQITextColor(
-        clickedStationAQI === '0' ||
-          clickedStationAQI === '4' ||
-          clickedStationAQI === '5'
-          ? 'text-white'
-          : 'text-black'
-      );
-
-      switch (clickedStationAQI) {
-        case '-1':
-          setAQItxt('Brak indeksu');
-          setAirImage(`${imgHelper}-1.svg`);
-          break;
-        case '0':
-          setAQItxt(`Bardzo dobra ${helperTxt}`);
-          setAirImage(`${imgHelper}0.svg`);
-          break;
-        case '1':
-          setAQItxt(`Dobra ${helperTxt}`);
-          setAirImage(`${imgHelper}1.svg`);
-          break;
-        case '2':
-          setAQItxt(`Umiarkowana ${helperTxt}`);
-          setAirImage(`${imgHelper}2.svg`);
-          break;
-        case '3':
-          setAQItxt(`Niezadowalająca ${helperTxt}`);
-          setAirImage(`${imgHelper}3.svg`);
-          break;
-        case '4':
-          setAQItxt(`Zła ${helperTxt}`);
-          setAirImage(`${imgHelper}4.svg`);
-          break;
-        case '5':
-          setAQItxt(`Bardzo zła ${helperTxt}`);
-          setAirImage(`${imgHelper}5.svg`);
-          break;
-      }
-    }
-  }, [clickedStationID]);
-
   const getLatestSensorValues = () => {
     setIsLoading(false);
     return (
       <>
+        <div className='text-xs mb-3'>
+          Źródło danych:&nbsp;
+          <Link
+            href='https://powietrze.gios.gov.pl/pjp/home'
+            target='_blank'
+            className='font-bold text-blue3'
+          >
+            GIOŚ
+          </Link>
+        </div>
         <section className='flex justify-between'>
           <ul>
             {sensorData.map((sensor, index) => {
@@ -293,24 +297,11 @@ const Sidebar = ({
               }
             })}
           </ul>
-          {/* <div className='flex flex-col items-center'>
-            <span>Wiatr</span>
-            <span>
-              {(windData.speed * 3).toFixed()}
-              <span className='font-extralight'> km/h</span>
-            </span>
-            <Image
-              src='wind-arrow.svg'
-              alt='Strzałka wskazująca kierunek wiatru'
-              width={22}
-              height={22}
-              className='mt-1'
-              style={{ transform: `rotate(${windData.deg}deg)` }}
-            />
-          </div> */}
         </section>
+        <span className='border border-blue2 mt-1 mb-2'></span>
+        {/* <WindComponent weatherData={weatherData} /> */}
         <button
-          className='border mt-[.58rem] border-blue2 self-center py-1 px-4 rounded-2xl text-center font-semibold text-base text-white hover:bg-blue2 transition-all'
+          className='border mt-2 border-blue2 self-center py-1 px-4 rounded-2xl text-center font-semibold text-base text-white hover:bg-blue2 transition-all'
           onClick={() => {
             setBookmark('raport');
             setIsRaportActive(true);
@@ -321,7 +312,6 @@ const Sidebar = ({
         <ChartComponent sensorData={sensorData} />
       </>
     );
-    // return null;
   };
 
   return (
@@ -329,13 +319,13 @@ const Sidebar = ({
       <div
         className={`relative flex h-screen sm:overflow-y-auto sm:overflow-x-hidden sm:border-r-[1px] sm:border-blue2 text-white ${
           isRaportActive
-            ? 'md:w-96 lg:w-full'
+            ? 'w-full sm:w-96 lg:w-[34rem] xl:w-[40rem] 2xl:w-[50rem]'
             : 'sm:w-80 md:w-96 lg:w-[28rem] xl:w-[34rem]'
         }  ${isSidebarOpen ? 'block' : 'hidden sm:flex'} }`}
       >
         <div
           className={`flex flex-col ${
-            isRaportActive ? 'md:w-96 lg:w-full' : 'w-full sm:w-80 md:w-full'
+            isRaportActive ? 'w-full' : 'w-full sm:w-80 md:w-full'
           } py-2 p-4 sm:text-sm lg:text-base`}
         >
           {isLoading && <Loading />}
@@ -346,6 +336,7 @@ const Sidebar = ({
           {bookmark === 'favorites' && !isLoading && (
             <FavoriteStations AQI={AQI} />
           )}
+          {bookmark === 'credits' && !isLoading && <Credits />}
           {bookmark === 'raport' && !isLoading && (
             <Raport
               raport={raport}
@@ -355,36 +346,14 @@ const Sidebar = ({
           )}
           {!isLoading && bookmark === 'station' && sensorData && (
             <>
-                <button
-                  className='sm:hidden absolute top-2 right-5'
-                  onClick={() => {
-                    deleteQueryString(
-                      [
-                        'stationID',
-                        'stationAQI',
-                        'sensorID',
-                        'dateFrom',
-                        'dateTo',
-                      ],
-                      router,
-                      pathname,
-                      searchParams
-                    );
-                    setIsSidebarOpen(false);
-                    setIsMarkerSelected(false);
-                    setSelectedStationID(null);
-                    setIsRaportActive(false);
-                    setBookmark('ranking');
-                  }}
-                >
-                  X
-                </button>
+              <CloseButtonMobile />
               <Image
                 src={airImage}
                 alt='Zdjęcie odzwierciedlające jakość powietrza'
-                width={280}
-                height={280}
+                width={230}
+                height={230}
                 className='self-center'
+                priority={true}
               />
               <div
                 className={`self-center py-1 px-3 rounded-2xl text-center font-semibold text-base lg:text-lg ${AQITextColor} ${aqiBackgroundClass}`}
@@ -394,7 +363,7 @@ const Sidebar = ({
               <div className='flex items-center justify-evenly mt-2 mb-2'>
                 <Tooltip
                   content='Zlokalizuj stację na mapie'
-                  showArrow={true}
+                  showArrow={false}
                   placement='top'
                   offset={0}
                   delay={0}
@@ -422,7 +391,7 @@ const Sidebar = ({
                       ? 'Usuń z ulubionych'
                       : 'Dodaj do ulubionych'
                   }
-                  showArrow={true}
+                  showArrow={false}
                   placement='top'
                   offset={0}
                   delay={0}
@@ -434,52 +403,54 @@ const Sidebar = ({
                     ],
                   }}
                 >
-                  {isStationAddedToFavorites ? (
-                    <svg
-                      xmlnsDc='http://purl.org/dc/elements/1.1/'
-                      xmlnsCc='http://creativecommons.org/ns#'
-                      xmlnsRdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'
-                      xmlnsSvg='http://www.w3.org/2000/svg'
-                      xmlns='http://www.w3.org/2000/svg'
-                      xmlnsSodipodi='http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd'
-                      xmlnsInkscape='http://www.inkscape.org/namespaces/inkscape'
-                      version='1.1'
-                      x='0px'
-                      y='0px'
-                      viewBox='0 0 100 100'
-                      fill='#dc2626'
-                      xmlSpace='preserve'
-                      className='w-8 h-8 hover:fill-[#808080] hover:stroke-[#808080] hover:cursor-pointer transform hover:scale-110 transition-all'
-                      onClick={addStationToFavorites}
-                    >
-                      <path d='M 30,13 C 16.4602,13 8,23.94921 8,37.437501 8,58.448443 32.72039,79.898651 50,87.000001 67.27961,79.898651 92,58.448443 92,37.437501 92,23.94921 83.5398,13 70,13 61.92302,13 55,18.000001 50,24.000001 45,18.000001 38.076977,13 30,13 z' />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlnsDc='http://purl.org/dc/elements/1.1/'
-                      xmlnsCc='http://creativecommons.org/ns#'
-                      xmlnsRdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'
-                      xmlnsSvg='http://www.w3.org/2000/svg'
-                      xmlns='http://www.w3.org/2000/svg'
-                      xmlnsSodipodi='http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd'
-                      xmlnsInkscape='http://www.inkscape.org/namespaces/inkscape'
-                      version='1.1'
-                      x='0px'
-                      y='0px'
-                      viewBox='0 0 100 100'
-                      fill='#38A3A5'
-                      stroke='#38A3A5'
-                      strokeWidth='3'
-                      xmlSpace='preserve'
-                      className='w-8 h-8 hover:fill-red-500 hover:stroke-red-600 hover:cursor-pointer transform hover:scale-110 transition-all'
-                      onClick={addStationToFavorites}
-                    >
-                      <path d='M 30,12 C 22.960544,12 17.141327,14.870392 13.15625,19.5 9.1711726,24.129608 7,30.484279 7,37.4375 7,48.335154 13.337583,59.138127 21.78125,68.125 30.224917,77.111873 40.812845,84.315995 49.625,87.9375 a 1.0001,1.0001 0 0 0 0.75,0 C 59.187155,84.315995 69.775083,77.111873 78.21875,68.125 86.662417,59.138127 93,48.335154 93,37.4375 93,30.484279 90.828827,24.129608 86.84375,19.5 82.858673,14.870392 77.039456,12 70,12 61.903947,12 55.058072,16.798266 50,22.5625 44.941928,16.798265 38.09605,12 30,12 z m 0,2 c 7.664281,0 14.33446,4.763852 19.21875,10.625 a 1.0001,1.0001 0 0 0 1.5625,0 C 55.66554,18.763852 62.335716,14 70,14 76.500344,14 81.682527,16.59543 85.3125,20.8125 88.942473,25.02957 91,30.90243 91,37.4375 91,47.550788 84.98643,57.983696 76.75,66.75 68.630113,75.392263 58.401501,82.344364 50,85.875 41.598499,82.344364 31.369887,75.392263 23.25,66.75 15.01357,57.983696 9,47.550788 9,37.4375 9,30.90243 11.057527,25.02957 14.6875,20.8125 18.317473,16.59543 23.499656,14 30,14 z' />
-                    </svg>
-                  )}
+                  <div className='group'>
+                    {isStationAddedToFavorites ? (
+                      <svg
+                        xmlnsDc='http://purl.org/dc/elements/1.1/'
+                        xmlnsCc='http://creativecommons.org/ns#'
+                        xmlnsRdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+                        xmlnsSvg='http://www.w3.org/2000/svg'
+                        xmlns='http://www.w3.org/2000/svg'
+                        xmlnsSodipodi='http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd'
+                        xmlnsInkscape='http://www.inkscape.org/namespaces/inkscape'
+                        version='1.1'
+                        x='0px'
+                        y='0px'
+                        viewBox='0 0 100 100'
+                        fill='#dc2626'
+                        xmlSpace='preserve'
+                        className='w-8 h-8 sm:hover:fill-[#808080] sm:active:fill-red-500 sm:focus:fill-red-500 sm:hover:stroke-[#808080] sm:hover:cursor-pointer transform sm:hover:scale-110 transition-all'
+                        onClick={addStationToFavorites}
+                      >
+                        <path d='M 30,13 C 16.4602,13 8,23.94921 8,37.437501 8,58.448443 32.72039,79.898651 50,87.000001 67.27961,79.898651 92,58.448443 92,37.437501 92,23.94921 83.5398,13 70,13 61.92302,13 55,18.000001 50,24.000001 45,18.000001 38.076977,13 30,13 z' />
+                      </svg>
+                    ) : (
+                      <svg
+                        xmlnsDc='http://purl.org/dc/elements/1.1/'
+                        xmlnsCc='http://creativecommons.org/ns#'
+                        xmlnsRdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+                        xmlnsSvg='http://www.w3.org/2000/svg'
+                        xmlns='http://www.w3.org/2000/svg'
+                        xmlnsSodipodi='http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd'
+                        xmlnsInkscape='http://www.inkscape.org/namespaces/inkscape'
+                        version='1.1'
+                        x='0px'
+                        y='0px'
+                        viewBox='0 0 100 100'
+                        fill='#38A3A5'
+                        stroke='#38A3A5'
+                        strokeWidth='3'
+                        xmlSpace='preserve'
+                        className='w-8 h-8 sm:hover:fill-red-500 sm:active:fill-red-500 sm:hover:stroke-red-600 sm:hover:cursor-pointer transform sm:hover:scale-110 transition-all'
+                        onClick={addStationToFavorites}
+                      >
+                        <path d='M 30,12 C 22.960544,12 17.141327,14.870392 13.15625,19.5 9.1711726,24.129608 7,30.484279 7,37.4375 7,48.335154 13.337583,59.138127 21.78125,68.125 30.224917,77.111873 40.812845,84.315995 49.625,87.9375 a 1.0001,1.0001 0 0 0 0.75,0 C 59.187155,84.315995 69.775083,77.111873 78.21875,68.125 86.662417,59.138127 93,48.335154 93,37.4375 93,30.484279 90.828827,24.129608 86.84375,19.5 82.858673,14.870392 77.039456,12 70,12 61.903947,12 55.058072,16.798266 50,22.5625 44.941928,16.798265 38.09605,12 30,12 z m 0,2 c 7.664281,0 14.33446,4.763852 19.21875,10.625 a 1.0001,1.0001 0 0 0 1.5625,0 C 55.66554,18.763852 62.335716,14 70,14 76.500344,14 81.682527,16.59543 85.3125,20.8125 88.942473,25.02957 91,30.90243 91,37.4375 91,47.550788 84.98643,57.983696 76.75,66.75 68.630113,75.392263 58.401501,82.344364 50,85.875 41.598499,82.344364 31.369887,75.392263 23.25,66.75 15.01357,57.983696 9,47.550788 9,37.4375 9,30.90243 11.057527,25.02957 14.6875,20.8125 18.317473,16.59543 23.499656,14 30,14 z' />
+                      </svg>
+                    )}
+                  </div>
                 </Tooltip>
               </div>
-              <span className='border border-blue2 mb-3'></span>
+              <span className='border border-blue2 mb-2'></span>
 
               {sensorData && getLatestSensorValues()}
             </>

@@ -6,7 +6,7 @@ import {
   getSensorData,
   generateRaport,
 } from './lib/getAirQualityData';
-import { getWindData } from './lib/getWindData';
+import { getWeatherData } from './lib/getWeatherData';
 import Display from './components/Display';
 
 // export const dynamic = 'force-dynamic';
@@ -18,7 +18,7 @@ export default async function Page({ searchParams }) {
 
   // Sidebar
   const clickedStationID = searchParams?.stationID ?? '';
-  const clickedStationAQI = searchParams?.stationAQI ?? '';
+
   const thisStation = clickedStationID
     ? stations.find((station) => station.id == clickedStationID)
     : null;
@@ -26,8 +26,10 @@ export default async function Page({ searchParams }) {
   const { sensorIDsData, sensorIDs } =
     (await getSensorID(clickedStationID)) || {};
   const sensorData = await getSensorData(sensorIDs);
-  // const windData = thisStation
-  //   ? await getWindData(thisStation.gegrLat, thisStation.gegrLon)
+
+  // WindData
+  // const weatherData = thisStation
+  //   ? await getWeatherData(thisStation.gegrLat, thisStation.gegrLon)
   //   : null;
 
   // Raport
@@ -36,43 +38,15 @@ export default async function Page({ searchParams }) {
   const dateTo = searchParams?.dateTo ?? '';
 
   const raport = await generateRaport(sensorQueryID, dateFrom, dateTo);
-  console.log(raport);
 
   return (
-    // <div className='bg-blue0 sm:flex sm:h-full'>
-    //   <div className='hidden sm:block'>
-    //     <Navigation stations={stations} AQI={AQI} />
-    //   </div>
-    //   <Sidebar
-    //     clickedStationID={clickedStationID}
-    //     clickedStationAQI={clickedStationAQI}
-    //     sensorData={sensorData}
-    //     AQI={AQI}
-    //     stations={stations}
-    //     thisStation={thisStation}
-    //     // windData={windData}
-    //     raport={raport}
-    //     sensorIDsData={sensorIDsData}
-    //   />
-    //   <div className='flex flex-col sm:flex-grow h-screen'>
-    //     <MapComponent
-    //       stations={stations}
-    //       AQI={AQI}
-    //       clickedStationID={clickedStationID}
-    //     />
-    //     <div className='sm:hidden'>
-    //       <Navigation stations={stations} AQI={AQI} />
-    //     </div>
-    //   </div>
-    // </div>
     <Display
       clickedStationID={clickedStationID}
-      clickedStationAQI={clickedStationAQI}
       sensorData={sensorData}
       AQI={AQI}
       stations={stations}
       thisStation={thisStation}
-      // windData={windData}
+      // weatherData={weatherData}
       raport={raport}
       sensorIDsData={sensorIDsData}
     />

@@ -9,6 +9,7 @@ body,
   height: 100%;
 }
 
+@media only screen and (min-width: 640px) {
 ::-webkit-scrollbar {
   width: 0.5rem;
 }
@@ -24,4 +25,19 @@ body,
 
 ::-webkit-scrollbar-thumb:hover {
   background: #38a3a5;
+}
+}
+
+@media only screen and (max-width: 425px) {
+  .weather-container {
+    /* gap: .5rem; */
+    font-size: .7rem;
+  }
+}
+
+@media only screen and (max-width: 350px) {
+  .weather-container {
+    gap: .5rem;
+    font-size: .7rem;
+  }
 }

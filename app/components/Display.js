@@ -1,21 +1,21 @@
 'use client';
 import React from 'react';
-import MapComponent from './Map';
-import Navigation from './Navigation';
-import Sidebar from './Sidebar';
-import { useArrowFlagContext } from '../store/arrowFlagContext';
+import MapComponent from './Map/Map';
+import Navigation from './Navigation/Navigation';
+import Sidebar from './Sidebar/Sidebar';
+import { useMainContext } from '../store/MainContext';
 
 const Display = ({
   clickedStationID,
-  clickedStationAQI,
   sensorData,
   AQI,
   stations,
   thisStation,
+  // weatherData,
   raport,
   sensorIDsData,
 }) => {
-  const { isSidebarOpen } = useArrowFlagContext();
+  const { isSidebarOpen } = useMainContext();
   return (
     <div className='bg-blue0 sm:flex sm:h-full'>
       <div className='hidden sm:block'>
@@ -24,26 +24,26 @@ const Display = ({
       <div className='sm:block hidden'>
         <Sidebar
           clickedStationID={clickedStationID}
-          clickedStationAQI={clickedStationAQI}
           sensorData={sensorData}
           AQI={AQI}
           stations={stations}
           thisStation={thisStation}
-          // windData={windData}
+          // weatherData={weatherData}
           raport={raport}
           sensorIDsData={sensorIDsData}
         />
       </div>
       <div className='flex flex-col flex-grow h-[100svh]'>
-        <div className={`sm:hidden overflow-auto ${isSidebarOpen ? '' : 'hidden'}`}>
+        <div
+          className={`sm:hidden overflow-auto ${isSidebarOpen ? '' : 'hidden'}`}
+        >
           <Sidebar
             clickedStationID={clickedStationID}
-            clickedStationAQI={clickedStationAQI}
             sensorData={sensorData}
             AQI={AQI}
             stations={stations}
             thisStation={thisStation}
-            // windData={windData}
+            // weatherData={weatherData}
             raport={raport}
             sensorIDsData={sensorIDsData}
           />
@@ -51,7 +51,6 @@ const Display = ({
         <MapComponent
           stations={stations}
           AQI={AQI}
-          clickedStationID={clickedStationID}
         />
         <div className='sm:hidden '>
           <Navigation stations={stations} AQI={AQI} />

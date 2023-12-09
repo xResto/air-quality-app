@@ -1,7 +1,8 @@
 import './globals.css';
 
 import { Montserrat } from 'next/font/google';
-import ArrowFlagContextProvider from './store/arrowFlagContext';
+import MainContextProvider from './store/MainContext';
+// import { NextUIProviderWrapper } from './store/providers';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -18,7 +19,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang='en' className={montserrat.variable}>
       <body>
-          <ArrowFlagContextProvider>{children}</ArrowFlagContextProvider>
+        {/* <NextUIProviderWrapper> */}
+          <MainContextProvider>{children}</MainContextProvider>
+        {/* </NextUIProviderWrapper> */}
       </body>
     </html>
   );

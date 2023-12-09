@@ -1,34 +1,9 @@
-export const createQueryString = (
-  name1,
-  value1,
-  name2,
-  value2,
-  searchParams
-) => {
+export const createQueryString = (name1, value1, searchParams) => {
   const params = new URLSearchParams(searchParams);
   params.set(name1, value1);
-  params.set(name2, value2);
 
   return params.toString();
 };
-
-// export const deleteQueryString = (
-//   name1,
-//   name2,
-//   router,
-//   pathname,
-//   searchParams
-// ) => {
-//   const params = new URLSearchParams(searchParams);
-//   params.delete(name1);
-//   params.delete(name2);
-
-//   const path = typeof pathname === 'function' ? pathname() : pathname;
-
-//   router.replace(`${path}?${params.toString()}`, undefined, {
-//     shallow: true,
-//   });
-// };
 
 export const deleteQueryString = (
   namesToDelete,
@@ -45,14 +20,6 @@ export const deleteQueryString = (
   const path = typeof pathname === 'function' ? pathname() : pathname;
   router.replace(`${path}?${params.toString()}`, undefined, { shallow: true });
 };
-
-// export const createRaportQueryString = (sensorID, dayNumber) => {
-//   const params = new URLSearchParams();
-//   params.set('sensorID', sensorID);
-//   params.set('dayNumber', dayNumber);
-
-//   return params.toString();
-// };
 
 export const createRaportQueryString = (
   sensorIDs,

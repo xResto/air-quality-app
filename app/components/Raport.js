@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { createRaportQueryString } from '../utils/queryString';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { useArrowFlagContext } from '../store/arrowFlagContext';
+import Image from 'next/image';
+import { useMainContext } from '../store/MainContext';
 import {
   FormControl,
   Select,
@@ -78,14 +79,16 @@ const StyledPickersLayout = styled(PickersLayout)({
 });
 
 const Raport = ({ raport, sensorIDsData, stationName }) => {
-  const [selectedDateFrom, setSelectedDateFrom] = useState(null);
-  const [selectedDateTo, setSelectedDateTo] = useState(null);
   const {
     selectedPollutants,
     setSelectedPollutants,
     setBookmark,
     setIsRaportActive,
-  } = useArrowFlagContext();
+    selectedDateFrom,
+    setSelectedDateFrom,
+    selectedDateTo,
+    setSelectedDateTo,
+  } = useMainContext();
 
   const router = useRouter();
   const pathname = usePathname();
@@ -144,9 +147,14 @@ const Raport = ({ raport, sensorIDsData, stationName }) => {
 
   return (
     <div>
-      <div className='flex text-center mb-2'>
-        <div className='text-xl font-semibold flex-grow'>{stationName}</div>
-        <button
+      <div className='flex items-center text-center mb-3'>
+        <div className='hidden sm:block h-10 w-10'></div>
+        <Image
+          src='close.svg'
+          width={50}
+          height={50}
+          alt='Ikonka X'
+          className='sm:hidden block h-10 w-10 hover:cursor-pointer hover:bg-blue0v2 rounded-[50%] transform hover:scale-110 transition-transform'
           onClick={() => {
             setBookmark('station');
             deleteQueryString(
@@ -157,9 +165,26 @@ const Raport = ({ raport, sensorIDsData, stationName }) => {
             );
             setIsRaportActive(false);
           }}
-        >
-          X
-        </button>
+        />
+        <div className='text-xl font-semibold flex-grow'>{stationName}</div>
+        <Image
+          src='close.svg'
+          width={50}
+          height={50}
+          alt='Ikonka X'
+          className='hidden sm:block h-10 w-10 hover:cursor-pointer hover:bg-blue0v2 rounded-[50%] transform hover:scale-110 transition-transform'
+          onClick={() => {
+            setBookmark('station');
+            deleteQueryString(
+              ['sensorID', 'dateFrom', 'dateTo'],
+              router,
+              pathname,
+              searchParams
+            );
+            setIsRaportActive(false);
+          }}
+        />
+        <div className='sm:hidden block h-10 w-10'></div>
       </div>
 
       <div className='flex flex-col gap-4 justify-center'>
@@ -264,12 +289,7 @@ const Raport = ({ raport, sensorIDsData, stationName }) => {
           Generuj Raport
         </button>
         {raport && (
-          <HistoricalDataChart
-            raport={raport}
-            sensorIDsData={sensorIDsData}
-            selectedDateFrom={selectedDateFrom}
-            selectedDateTo={selectedDateTo}
-          />
+          <HistoricalDataChart raport={raport} sensorIDsData={sensorIDsData} />
         )}
       </div>
     </div>

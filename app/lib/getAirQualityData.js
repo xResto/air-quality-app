@@ -16,6 +16,21 @@ export const getAllStations = async () => {
   }
 };
 
+// export const getAllStations = async () => {
+//   try {
+//     const res = await fetch('/api/stations');
+//     if (!res.ok) {
+//       throw new Error(`HTTP error! Status: ${res.status}`);
+//     }
+//     const data = await res.json();
+
+//     return data.data;
+//   } catch (error) {
+//     console.error('Error in getAllStations:', error);
+//     return null;
+//   }
+// };
+
 export const getAqiData = async (stationsID) => {
   if (!stationsID) return null;
 
@@ -83,7 +98,6 @@ export const getSensorData = async (sensorIDs) => {
         `https://api.gios.gov.pl/pjp-api/rest/data/getData/${sensorID}`,
         {
           cache: 'no-store',
-          // next: { revalidate: 300 },
         }
       );
 
@@ -115,56 +129,14 @@ export const getSensorData = async (sensorIDs) => {
   return sensorData;
 };
 
-// export const generateRaport = async (sensorIDString, dateFrom, dateTo) => {
-//   try {
-//     // Check if sensorIDString is valid and not empty
-//     if (!sensorIDString || sensorIDString.length === 0) {
-//       console.error("Invalid or empty sensorIDString");
-//       return [];
-//     }
-
-//     // Split the sensorID string into an array of IDs
-//     const sensorIDs = sensorIDString.split(',');
-
-//     // If there's only one sensorID, handle it directly
-//     if (sensorIDs.length === 1) {
-//       const res = await fetch(
-//         `https://api.gios.gov.pl/pjp-api/v1/rest/archivalData/getDataBySensor/${sensorIDs[0]}?size=500&dateFrom=${dateFrom}&dateTo=${dateTo}`,
-//         { cache: 'no-store' }
-//       );
-//       const data = await res.json();
-//       return [data['Lista archiwalnych wyników pomiarów']]; // Return as an array for consistency
-//     }
-
-//     // Handle multiple sensorIDs
-//     const reports = await Promise.all(
-//       sensorIDs.map(async (sensorID) => {
-//         const res = await fetch(
-//           `https://api.gios.gov.pl/pjp-api/v1/rest/archivalData/getDataBySensor/${sensorID}?size=500&dateFrom=${dateFrom}&dateTo=${dateTo}`,
-//           { cache: 'no-store' }
-//         );
-//         const data = await res.json();
-//         return data['Lista archiwalnych wyników pomiarów'];
-//       })
-//     );
-//     return reports;
-//   } catch (error) {
-//     console.error("Error fetching reports:", error);
-//     return [];
-//   }
-// };
-
 export const generateRaport = async (sensorIDString, dateFrom, dateTo) => {
   try {
-    // Check if sensorIDString is valid and not empty
     if (!sensorIDString || sensorIDString.length === 0) {
       return '';
     }
 
-    // Split the sensorID string into an array of IDs
     const sensorIDs = sensorIDString.split(',');
 
-    // Function to fetch data from a single sensor with pagination handling
     const fetchDataFromSensor = async (sensorID) => {
       let allData = [];
       let page = 0;
@@ -172,13 +144,12 @@ export const generateRaport = async (sensorIDString, dateFrom, dateTo) => {
 
       do {
         const res = await fetch(
-          `https://api.gios.gov.pl/pjp-api/v1/rest/archivalData/getDataBySensor/${sensorID}?size=500&dateFrom=${dateFrom}&dateTo=${dateTo}&page=${page}`
-          // { cache: 'no-store' }
+          `https://api.gios.gov.pl/pjp-api/v1/rest/archivalData/getDataBySensor/${sensorID}?size=500&dateFrom=${dateFrom}&dateTo=${dateTo}&page=${page}`,
+          { cache: 'no-store' }
         );
         const data = await res.json();
 
         if (data.error_code) {
-          // allData = data.error_result;
           console.log('error za szybko');
         }
         if (!data.error_code) {
@@ -192,7 +163,6 @@ export const generateRaport = async (sensorIDString, dateFrom, dateTo) => {
       return allData;
     };
 
-    // Handle multiple sensorIDs
     const reports = await Promise.all(
       sensorIDs.map((sensorID) => fetchDataFromSensor(sensorID))
     );

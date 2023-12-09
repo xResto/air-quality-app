@@ -10,17 +10,18 @@ import {
   Title,
   Tooltip,
 } from 'chart.js';
-import { useArrowFlagContext } from '../store/arrowFlagContext';
+import { useMainContext } from '../store/MainContext';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 
-const HistoricalDataChart = ({
-  raport,
-  sensorIDsData,
-  selectedDateFrom,
-  selectedDateTo,
-}) => {
-  const { selectedPollutants } = useArrowFlagContext();
+const HistoricalDataChart = ({ raport, sensorIDsData }) => {
+  const {
+    selectedPollutants,
+    selectedDateFrom,
+    setSelectedDateFrom,
+    selectedDateTo,
+    setSelectedDateTo,
+  } = useMainContext();
   const getPollutantCode = (stationCode) => {
     const sensor = sensorIDsData.find((s) =>
       stationCode.includes(s.param.paramCode)

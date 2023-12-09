@@ -2,9 +2,9 @@
 
 import React, { createContext, useContext, useState } from 'react';
 
-const ArrowFlagContext = createContext(null);
+const MainContext = createContext(null);
 
-export default function ArrowFlagContextProvider({ children }) {
+export default function MainContextProvider({ children }) {
   const [coordinate, setCoordinate] = useState({
     lat: 52.077,
     lng: 19,
@@ -20,9 +20,11 @@ export default function ArrowFlagContextProvider({ children }) {
   const [isRaportActive, setIsRaportActive] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobileRankingOpen, setIsMobileRankingOpen] = useState(false);
+  const [selectedDateFrom, setSelectedDateFrom] = useState(null);
+  const [selectedDateTo, setSelectedDateTo] = useState(null);
 
   return (
-    <ArrowFlagContext.Provider
+    <MainContext.Provider
       value={{
         bookmark,
         setBookmark,
@@ -48,19 +50,23 @@ export default function ArrowFlagContextProvider({ children }) {
         setIsSidebarOpen,
         isMobileRankingOpen,
         setIsMobileRankingOpen,
+        selectedDateFrom,
+        setSelectedDateFrom,
+        selectedDateTo,
+        setSelectedDateTo,
       }}
     >
       {children}
-    </ArrowFlagContext.Provider>
+    </MainContext.Provider>
   );
 }
 
-export function useArrowFlagContext() {
-  const context = useContext(ArrowFlagContext);
+export function useMainContext() {
+  const context = useContext(MainContext);
 
   if (context === undefined) {
     throw new Error(
-      'useArrowFlag must be used within a ArrowFlagContextProvider'
+      'useArrowFlag must be used within a MainContextProvider'
     );
   }
 
