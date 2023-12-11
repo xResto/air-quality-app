@@ -11,7 +11,7 @@ const Display = ({
   AQI,
   stations,
   thisStation,
-  // weatherData,
+  weatherData,
   raport,
   sensorIDsData,
 }) => {
@@ -28,7 +28,7 @@ const Display = ({
           AQI={AQI}
           stations={stations}
           thisStation={thisStation}
-          // weatherData={weatherData}
+          weatherData={weatherData}
           raport={raport}
           sensorIDsData={sensorIDsData}
         />
@@ -43,7 +43,7 @@ const Display = ({
             AQI={AQI}
             stations={stations}
             thisStation={thisStation}
-            // weatherData={weatherData}
+            weatherData={weatherData}
             raport={raport}
             sensorIDsData={sensorIDsData}
           />

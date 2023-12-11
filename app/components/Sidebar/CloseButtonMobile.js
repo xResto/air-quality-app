@@ -25,7 +25,10 @@ const CloseButtonMobile = () => {
       height={50}
       alt='Ikonka X'
       className={`sm:hidden h-8 w-8 ${
-        bookmark === 'ranking' || bookmark === 'favorites'
+        bookmark === 'ranking' ||
+        bookmark === 'favorites' ||
+        bookmark === 'credits' ||
+        bookmark === 'info'
           ? 'block'
           : 'absolute top-2 left-4'
       }`}

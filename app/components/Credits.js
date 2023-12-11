@@ -9,7 +9,7 @@ const Credits = () => {
     <>
       <div className='flex gap-1 mb-2'>
         <CloseButtonMobile />
-        <div className='flex flex-grow justify-center text-2xl font-semibold text-center'>
+        <div className='flex flex-grow justify-center items-center text-xl sm:text-2xl font-semibold text-center'>
           Credits
         </div>
         <div className='h-8 w-8 sm:hidden'></div>
@@ -119,6 +119,17 @@ const Credits = () => {
           Location marker with heart icon by Athok from&nbsp;
           <Link
             href='https://thenounproject.com/icon/pin-4530450/'
+            target='_blank'
+            className='font-bold text-blue3'
+          >
+            Noun Project
+          </Link>
+          &nbsp;(CC BY 3.0)
+        </li>
+        <li>
+          Info icon by Dwi ridwanto from&nbsp;
+          <Link
+            href='https://thenounproject.com/icon/info-6359823/'
             target='_blank'
             className='font-bold text-blue3'
           >

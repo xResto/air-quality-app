@@ -23,14 +23,22 @@ export default async function Page({ searchParams }) {
     ? stations.find((station) => station.id == clickedStationID)
     : null;
 
-  const { sensorIDsData, sensorIDs } =
-    (await getSensorID(clickedStationID)) || {};
+  const sensorIDResult = await getSensorID(clickedStationID);
+  const { sensorIDsData, sensorIDs } = sensorIDResult || {};
   const sensorData = await getSensorData(sensorIDs);
 
-  // WindData
-  // const weatherData = thisStation
-  //   ? await getWeatherData(thisStation.gegrLat, thisStation.gegrLon)
-  //   : null;
+  // const { sensorIDsData, sensorIDs } =
+  //   (await getSensorID(clickedStationID)) || {};
+
+  //  WeatherData
+  const weatherData = thisStation
+    ? await getWeatherData(thisStation.gegrLat, thisStation.gegrLon)
+    : null;
+
+  const [resolvedSensorData, resolvedWeatherData] = await Promise.all([
+    sensorData,
+    weatherData,
+  ]);
 
   // Raport
   const sensorQueryID = searchParams?.sensorID ?? '';
@@ -42,11 +50,11 @@ export default async function Page({ searchParams }) {
   return (
     <Display
       clickedStationID={clickedStationID}
-      sensorData={sensorData}
+      sensorData={resolvedSensorData}
       AQI={AQI}
       stations={stations}
       thisStation={thisStation}
-      // weatherData={weatherData}
+      weatherData={resolvedWeatherData}
       raport={raport}
       sensorIDsData={sensorIDsData}
     />

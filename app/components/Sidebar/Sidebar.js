@@ -1,4 +1,3 @@
-
 'use client';
 import ChartComponent from '../ChartComponent';
 import AQIranking from '../AQIRanking/AQIranking';
@@ -15,6 +14,7 @@ import WindComponent from './WeatherComponent';
 import CloseButtonMobile from './CloseButtonMobile';
 import Credits from '../Credits';
 import Link from 'next/link';
+import Info from '../Info';
 
 const Sidebar = ({
   clickedStationID,
@@ -23,7 +23,7 @@ const Sidebar = ({
   AQI,
   stations,
   thisStation,
-  // weatherData,
+  weatherData,
   raport,
 }) => {
   const [AQItxt, setAQItxt] = useState('');
@@ -43,11 +43,19 @@ const Sidebar = ({
     setIsRaportActive,
     isSidebarOpen,
     setIsSidebarOpen,
+    isMobileRankingOpen,
   } = useMainContext();
 
   const [aqiBackgroundClass, setAqiBackgroundClass] = useState('');
 
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const sidebarContainer = document.querySelector('.sidebar-container');
+    if (sidebarContainer) {
+      sidebarContainer.scrollTop = 0;
+    }
+  }, [isMobileRankingOpen]);
 
   useEffect(() => {
     setIsLoading(false);
@@ -299,7 +307,7 @@ const Sidebar = ({
           </ul>
         </section>
         <span className='border border-blue2 mt-1 mb-2'></span>
-        {/* <WindComponent weatherData={weatherData} /> */}
+        <WindComponent weatherData={weatherData} />
         <button
           className='border mt-2 border-blue2 self-center py-1 px-4 rounded-2xl text-center font-semibold text-base text-white hover:bg-blue2 transition-all'
           onClick={() => {
@@ -317,7 +325,7 @@ const Sidebar = ({
   return (
     <>
       <div
-        className={`relative flex h-screen sm:overflow-y-auto sm:overflow-x-hidden sm:border-r-[1px] sm:border-blue2 text-white ${
+        className={`sidebar-container relative flex h-screen sm:overflow-y-auto sm:overflow-x-hidden sm:border-r-[1px] sm:border-blue2 text-white ${
           isRaportActive
             ? 'w-full sm:w-96 lg:w-[34rem] xl:w-[40rem] 2xl:w-[50rem]'
             : 'sm:w-80 md:w-96 lg:w-[28rem] xl:w-[34rem]'
@@ -336,6 +344,7 @@ const Sidebar = ({
           {bookmark === 'favorites' && !isLoading && (
             <FavoriteStations AQI={AQI} />
           )}
+          {bookmark === 'info' && !isLoading && <Info />}
           {bookmark === 'credits' && !isLoading && <Credits />}
           {bookmark === 'raport' && !isLoading && (
             <Raport

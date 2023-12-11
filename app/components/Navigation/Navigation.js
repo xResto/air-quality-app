@@ -77,6 +77,14 @@ const Navigation = ({ stations, AQI }) => {
         iconAlt='Ikonka pinezki lokalizacji z sercem'
       />
 
+      {/* Info */}
+      <NavigationButton
+        content='Informacje'
+        bookmarkName='info'
+        iconSrc='info.svg'
+        iconAlt='Ikonka informacji'
+      />
+
       {/* Credits */}
       <NavigationButton
         content='Credits'
