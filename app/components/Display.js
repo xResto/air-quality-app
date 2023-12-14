@@ -1,9 +1,14 @@
 'use client';
 import React from 'react';
-import MapComponent from './Map/Map';
+// import MapComponent from './Map/MapComponent';
 import Navigation from './Navigation/Navigation';
 import Sidebar from './Sidebar/Sidebar';
 import { useMainContext } from '../store/MainContext';
+import dynamic from 'next/dynamic';
+
+const MapComponent = dynamic(() => import('./Map/MapComponent'), {
+  ssr: false,
+});
 
 const Display = ({
   clickedStationID,
@@ -16,6 +21,7 @@ const Display = ({
   sensorIDsData,
 }) => {
   const { isSidebarOpen } = useMainContext();
+
   return (
     <div className='bg-blue0 sm:flex sm:h-full'>
       <div className='hidden sm:block'>
@@ -48,10 +54,7 @@ const Display = ({
             sensorIDsData={sensorIDsData}
           />
         </div>
-        <MapComponent
-          stations={stations}
-          AQI={AQI}
-        />
+        <MapComponent stations={stations} AQI={AQI} />
         <div className='sm:hidden '>
           <Navigation stations={stations} AQI={AQI} />
         </div>

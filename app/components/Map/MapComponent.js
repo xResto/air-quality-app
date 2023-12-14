@@ -1,6 +1,6 @@
 'use client';
+import 'leaflet/dist/leaflet.css';
 import { useCallback, useEffect } from 'react';
-import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useMainContext } from '../../store/MainContext';
 import { createQueryString, deleteQueryString } from '@/app/utils/queryString';
@@ -8,42 +8,60 @@ import Image from 'next/image';
 import Loading from '../Loading';
 import AQILegend from './AQILegend';
 import MobileReturnButton from './MobileReturnButton';
-
-const mapOptions = {
-  mapTypeControl: false,
-  fullscreenControl: false,
-  streetViewControl: false,
-};
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMapEvents,
+  useMap,
+} from 'react-leaflet';
+import L from 'leaflet';
+import { set } from 'date-fns';
 
 const getZoomLevel = () => {
-  if (window.innerWidth <= 640) {
-    return 6.35;
-  } else if (window.innerWidth <= 680) {
-    return 5.2;
-  } else if (window.innerWidth <= 720) {
-    return 5.4;
-  } else if (window.innerWidth <= 850) {
-    return 5.6;
-  } else if (window.innerWidth <= 920) {
-    return 5.85;
-  } else if (window.innerWidth <= 1100) {
-    return 6.1;
-  } else if (window.innerWidth <= 1200) {
-    return 6.35;
-  } else if (window.innerWidth <= 1350) {
-    return 6.5;
-  } else if (window.innerWidth <= 1400) {
-    return 6.6;
-  } else if (window.innerWidth <= 1500) {
-    return 6.8;
+  if (window.innerWidth <= 1350) {
+    return 6;
   } else {
-    return 6.9;
+    return 7;
   }
+};
+
+const ManageMap = () => {
+  const {
+    zoom,
+    coordinate,
+    selectedStationID,
+    findClosest,
+    setFindClosest,
+    setIsMapLoaded,
+  } = useMainContext();
+  const map = useMap();
+
+  useEffect(() => {
+    map.setZoom(getZoomLevel());
+  }, []);
+
+  useEffect(() => {
+    map.whenReady(() => {
+      setIsMapLoaded(true);
+      console.log('gotow');
+    });
+  }, [map, setIsMapLoaded]);
+
+  useEffect(() => {
+    if (findClosest) {
+      map.setView(coordinate, zoom);
+    }
+
+    return () => {
+      setFindClosest(false);
+    };
+  }, [findClosest]);
 };
 
 function MapComponent({ stations, AQI }) {
   const {
-    isGoogleMapsLoaded,
+    isMapLoaded,
     coordinate,
     zoom,
     userClosestStation,
@@ -54,18 +72,20 @@ function MapComponent({ stations, AQI }) {
     setIsLoading,
     setIsMarkerSelected,
     setSelectedStationID,
-    setIsGoogleMapsLoaded,
+    setIsMapLoaded,
     setSelectedPollutants,
     setIsRaportActive,
     isSidebarOpen,
     setIsSidebarOpen,
+    // map,
+    // setMap,
   } = useMainContext();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const handleLoad = () => {
-    setIsGoogleMapsLoaded(true);
+    setIsMapLoaded(true);
   };
 
   const handleZoomChange = (e) => {
@@ -87,16 +107,16 @@ function MapComponent({ stations, AQI }) {
   const getMarkerIcon = (stationID) => {
     const thisStation = AQI.find((station) => station.id === stationID);
 
-    let icon = '/-1.png'; // default icon
+    let iconUrl = '/-1.png'; // default icon
     let stationAQI = '-1'; // default AQI
 
     if (thisStation && thisStation.stIndexLevel) {
       stationAQI = thisStation.stIndexLevel.id;
-      icon = `/${stationAQI}.png`; // icon based on AQI
+      iconUrl = `/${stationAQI}.png`; // icon based on AQI
     }
 
     return {
-      icon,
+      iconUrl,
       stationAQI,
     };
   };
@@ -149,57 +169,54 @@ function MapComponent({ stations, AQI }) {
           isSidebarOpen ? 'hidden sm:block' : 'block'
         }`}
       >
-        {!isGoogleMapsLoaded && <Loading />}
-        <APIProvider
-          apiKey={process.env.NEXT_PUBLIC_API_KEY}
-          onLoad={handleLoad}
+        {!isMapLoaded && <Loading />}
+        {/* Leaflet Map */}
+        <MapContainer
+          center={coordinate}
+          zoom={zoom}
+          style={{ height: '100%', width: '100%' }}
         >
-          {isGoogleMapsLoaded && (
-            <Map
-              zoom={zoom}
-              center={coordinate}
-              mapId={process.env.NEXT_PUBLIC_MAP_ID}
-              options={mapOptions}
-              onZoomChanged={handleZoomChange}
-            >
-              {stations.map((station) => {
-                const { icon } = getMarkerIcon(station.id);
-                const zIndex = getMarkerZIndex(station.id);
-                const markerStyles =
-                  station.id === selectedStationID
-                    ? 'rounded-[50%] border-[3px] border-white box-border relative top-[3px] z-100'
-                    : '';
-                return (
-                  <AdvancedMarker
-                    position={{
-                      lat: +station.gegrLat,
-                      lng: +station.gegrLon,
-                    }}
-                    key={station.id}
-                    icon={icon}
-                    zIndex={zIndex}
-                    onClick={() => {
-                      handleMarkerClick(station.id);
-                    }}
-                  >
-                    <div className={markerStyles}>
-                      <Image
-                        src={icon}
-                        alt='Koło z kolorem odzwierciedlającym jakość powietrza'
-                        width={16}
-                        height={16}
-                      />
-                    </div>
-                  </AdvancedMarker>
-                );
-              })}
+          <ManageMap />
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" >OpenStreetMap</a>'
+            url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+            pane='tilePane'
+          />
+          <TileLayer
+            attribution='&copy; <a href="https://www.jawg.io/en/" target="_blank" >Jawg</a>'
+            url='https://tile.jawg.io/20b4afd8-2f74-4dd0-bc22-66a52407f145/{z}/{x}/{y}{r}.png?access-token=U8ZR6EnoiaBQV1oYgsbh8ANiPRF06HU8WcL2r0YP6xCJ0xTzDCrvdqKyUnbxPz6A'
+          />
 
-              <MobileReturnButton />
+          {/* Markers */}
+          {stations.map((station) => {
+            const { iconUrl } = getMarkerIcon(station.id);
+            const zIndex = getMarkerZIndex(station.id);
+            const markerStyles =
+              station.id === selectedStationID
+                ? 'rounded-[50%] border-[3px] border-white box-border z-100'
+                : '';
 
-              <AQILegend />
-            </Map>
-          )}
-        </APIProvider>
+            return (
+              <Marker
+                position={[+station.gegrLat, +station.gegrLon]}
+                icon={
+                  new L.Icon({
+                    iconUrl: iconUrl,
+                    className: markerStyles,
+                  })
+                }
+                zIndexOffset={zIndex}
+                eventHandlers={{
+                  click: () => handleMarkerClick(station.id),
+                }}
+                key={station.id}
+              />
+            );
+          })}
+
+          <MobileReturnButton />
+          <AQILegend />
+        </MapContainer>
       </div>
     </>
   );

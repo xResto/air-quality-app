@@ -15,13 +15,14 @@ export default function MainContextProvider({ children }) {
   const [userClosestStation, setUserClosestStation] = useState(null);
   const [isMarkerSelected, setIsMarkerSelected] = useState(false);
   const [selectedStationID, setSelectedStationID] = useState(null);
-  const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [selectedPollutants, setSelectedPollutants] = useState([]);
   const [isRaportActive, setIsRaportActive] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobileRankingOpen, setIsMobileRankingOpen] = useState(false);
   const [selectedDateFrom, setSelectedDateFrom] = useState(null);
   const [selectedDateTo, setSelectedDateTo] = useState(null);
+  const [findClosest, setFindClosest] = useState(false);
 
   return (
     <MainContext.Provider
@@ -40,8 +41,8 @@ export default function MainContextProvider({ children }) {
         setIsMarkerSelected,
         selectedStationID,
         setSelectedStationID,
-        isGoogleMapsLoaded,
-        setIsGoogleMapsLoaded,
+        isMapLoaded,
+        setIsMapLoaded,
         selectedPollutants,
         setSelectedPollutants,
         isRaportActive,
@@ -54,6 +55,8 @@ export default function MainContextProvider({ children }) {
         setSelectedDateFrom,
         selectedDateTo,
         setSelectedDateTo,
+        findClosest,
+        setFindClosest,
       }}
     >
       {children}
@@ -65,9 +68,7 @@ export function useMainContext() {
   const context = useContext(MainContext);
 
   if (context === undefined) {
-    throw new Error(
-      'useArrowFlag must be used within a MainContextProvider'
-    );
+    throw new Error('useArrowFlag must be used within a MainContextProvider');
   }
 
   return context;

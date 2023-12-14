@@ -6,6 +6,11 @@ export const getAllStations = async () => {
         next: { revalidate: 21600 },
       }
     );
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch stations. Status: ${res.status}`);
+    }
+
     const stations = await res.json();
 
     const stationsID = stations.map((station) => station.id);
@@ -45,6 +50,10 @@ export const getAqiData = async (stationsID) => {
         }
       );
 
+      if (!res.ok) {
+        throw new Error(`Failed to fetch AQI data. Status: ${res.status}`);
+      }
+
       const data = await res.json();
 
       return data;
@@ -68,6 +77,10 @@ export const getSensorID = async (stationID) => {
         next: { revalidate: 21600 },
       }
     );
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch sensorIDs. Status: ${res.status}`);
+    }
 
     const sensorIDsData = await res.json();
 
@@ -100,6 +113,10 @@ export const getSensorData = async (sensorIDs) => {
           cache: 'no-store',
         }
       );
+      
+      if (!res.ok) {
+        throw new Error(`Failed to fetch sensor data. Status: ${res.status}`);
+      }
 
       const data = await res.json();
 
@@ -147,10 +164,11 @@ export const generateRaport = async (sensorIDString, dateFrom, dateTo) => {
           `https://api.gios.gov.pl/pjp-api/v1/rest/archivalData/getDataBySensor/${sensorID}?size=500&dateFrom=${dateFrom}&dateTo=${dateTo}&page=${page}`,
           { cache: 'no-store' }
         );
+        
         const data = await res.json();
 
         if (data.error_code) {
-          console.log('error za szybko');
+          console.log('Wykorzystano limit zapytań. Spróbuj ponownie za chwilę.');
         }
         if (!data.error_code) {
           allData = allData.concat(data['Lista archiwalnych wyników pomiarów']);

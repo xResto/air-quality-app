@@ -9,12 +9,12 @@ import {
 import { getWeatherData } from './lib/getWeatherData';
 import Display from './components/Display';
 
-// export const dynamic = 'force-dynamic';
-
 export default async function Page({ searchParams }) {
   // Map
   const { stations, stationsID } = await getAllStations();
   const AQI = await getAqiData(stationsID);
+
+  // console.log(stations, stationsID);
 
   // Sidebar
   const clickedStationID = searchParams?.stationID ?? '';
@@ -26,9 +26,6 @@ export default async function Page({ searchParams }) {
   const sensorIDResult = await getSensorID(clickedStationID);
   const { sensorIDsData, sensorIDs } = sensorIDResult || {};
   const sensorData = await getSensorData(sensorIDs);
-
-  // const { sensorIDsData, sensorIDs } =
-  //   (await getSensorID(clickedStationID)) || {};
 
   //  WeatherData
   const weatherData = thisStation

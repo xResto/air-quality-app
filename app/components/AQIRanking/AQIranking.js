@@ -24,10 +24,14 @@ const AQIranking = ({ AQI, stations }) => {
       </div>
       <span className='border border-blue2 mb-2 block'></span>
       <ul>
-      {sortAQI.map((entry, index) => {
+        {sortAQI.map((entry, index) => {
           const station = stations.find((s) => s.id === entry.id);
           return (
-            <SingleRankingStation key={entry.id} entry={entry} station={station} />
+            <SingleRankingStation
+              key={entry.id}
+              entry={entry}
+              station={station}
+            />
           );
         })}
       </ul>

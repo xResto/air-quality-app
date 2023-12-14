@@ -94,6 +94,17 @@ const Credits = () => {
           &nbsp;on Freepik
         </li>
         <li>
+          Not found&nbsp;
+          <Link
+            href='https://www.freepik.com/free-vector/404-error-with-tired-person-concept-illustration_20602777.htm'
+            target='_blank'
+            className='font-bold text-blue3'
+          >
+            Image by storyset
+          </Link>
+          &nbsp;on Freepik
+        </li>
+        <li>
           Rank icon by DTDesign from&nbsp;
           <Link
             href='https://thenounproject.com/icon/rank-2533816/'

@@ -11,7 +11,7 @@ const backgroundColorPalette = [
 
 const AQILegend = () => {
   return (
-    <div className='absolute z-20 flex bottom-7 right-16 md:right-20 text-white text-xs font-medium'>
+    <div className='absolute z-1000 flex bottom-7 right-16 md:right-20 text-white text-xs font-medium'>
       <span className='absolute left-0 transform -translate-y-full'>Bdb</span>
       {backgroundColorPalette.map((color, index) => (
         <span key={index} className={`${color} w-6 md:w-8 h-1.5`}></span>

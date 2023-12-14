@@ -32,7 +32,7 @@ const Sidebar = ({
   const [isStationAddedToFavorites, setIsStationAddedToFavorites] =
     useState(null);
   const {
-    isGoogleMapsLoaded,
+    isMapLoaded,
     bookmark,
     isLoading,
     setBookmark,
@@ -44,6 +44,8 @@ const Sidebar = ({
     isSidebarOpen,
     setIsSidebarOpen,
     isMobileRankingOpen,
+    findClosest,
+    setFindClosest,
   } = useMainContext();
 
   const [aqiBackgroundClass, setAqiBackgroundClass] = useState('');
@@ -92,6 +94,7 @@ const Sidebar = ({
       }));
       setZoom(11);
       setIsSidebarOpen(false);
+      setFindClosest(true);
     }
   };
 
@@ -337,8 +340,8 @@ const Sidebar = ({
           } py-2 p-4 sm:text-sm lg:text-base`}
         >
           {isLoading && <Loading />}
-          {bookmark === 'ranking' && !isGoogleMapsLoaded && <Skeleton />}
-          {bookmark === 'ranking' && isGoogleMapsLoaded && !isLoading && (
+          {/* {bookmark === 'ranking' && !isGoogleMapsLoaded && <Skeleton />} */}
+          {bookmark === 'ranking' && !isLoading && (
             <AQIranking AQI={AQI} stations={stations} />
           )}
           {bookmark === 'favorites' && !isLoading && (
