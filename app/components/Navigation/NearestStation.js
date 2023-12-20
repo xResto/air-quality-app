@@ -1,19 +1,17 @@
 import React from 'react';
 import { useMainContext } from '@/app/store/MainContext';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { createQueryString, deleteQueryString } from '@/app/utils/queryString';
 import haversineDistance from 'haversine-distance';
 import NavigationTooltip from './NavigationTooltip';
 import Image from 'next/image';
 
-const ClosestStationIcon = ({ stations, AQI }) => {
+const NearestStation = ({ stations, AQI }) => {
   const {
-    userClosestStation,
     setBookmark,
     setIsLoading,
     setIsMarkerSelected,
     setSelectedStationID,
-    setSelectedPollutants,
+    setSelectedPollutant,
     setIsRaportActive,
     setIsSidebarOpen,
     setUserClosestStation,
@@ -23,13 +21,11 @@ const ClosestStationIcon = ({ stations, AQI }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const userLocationHandler = () => {
+  const findNearestStation = () => {
     navigator.geolocation.getCurrentPosition((position) => {
       const { latitude, longitude } = position.coords;
       const userCoordinates = { latitude, longitude };
 
-      // Haversine distance
-      let coordinateHaversineDistances = [];
       let minHaversineDistance = Number.MAX_VALUE;
       let idx = null;
       let stationID = null;
@@ -37,12 +33,14 @@ const ClosestStationIcon = ({ stations, AQI }) => {
 
       if (latitude !== 0 && longitude !== 0) {
         stations.forEach((station, index) => {
-          const a = {
+          const stationCoordinates = {
             latitude: station.gegrLat,
             longitude: station.gegrLon,
           };
-          const distance = haversineDistance(a, userCoordinates);
-          coordinateHaversineDistances.push(distance);
+          const distance = haversineDistance(
+            stationCoordinates,
+            userCoordinates
+          );
 
           if (distance < minHaversineDistance) {
             minHaversineDistance = distance;
@@ -58,42 +56,35 @@ const ClosestStationIcon = ({ stations, AQI }) => {
         if (thisStation && thisStation.stIndexLevel) {
           stationAQI = thisStation.stIndexLevel.id;
         }
+
         if (searchParams.get('stationID') !== stationID.toString()) {
           setIsLoading(true);
           setBookmark('station');
           setIsMarkerSelected(true);
           setSelectedStationID(stationID);
-          setSelectedPollutants([]);
+          setSelectedPollutant('');
           setIsRaportActive(false);
           setIsSidebarOpen(true);
 
-          deleteQueryString(
-            ['sensorID', 'dateFrom', 'dateTo'],
-            router,
-            pathname,
-            searchParams
-          );
-          const queryString = createQueryString(
-            'stationID',
-            stationID,
-            searchParams
-          );
-          router.push(`${pathname}?${queryString}`, {
-            scroll: false,
-          });
+          const params = new URLSearchParams(searchParams);
+          params.delete('sensorID');
+          params.delete('dateFrom');
+          params.delete('dateTo');
+          params.set('stationID', stationID);
+          router.push(`${pathname}?${params.toString()}`);
         } else {
           setIsLoading(false);
           setUserClosestStation(stationID);
-          console.log(userClosestStation);
         }
       }
     });
   };
+
   return (
     <NavigationTooltip content='Zlokalizuj najbliższą stację'>
       <div
         className='w-full h-16 sm:h-20 flex justify-center content-center p-2 lg:p-4 hover:bg-blue0v2 hover:cursor-pointer transition-colors'
-        onClick={userLocationHandler}
+        onClick={findNearestStation}
       >
         <Image
           src='user-location.svg'
@@ -107,4 +98,4 @@ const ClosestStationIcon = ({ stations, AQI }) => {
   );
 };
 
-export default ClosestStationIcon;
+export default NearestStation;

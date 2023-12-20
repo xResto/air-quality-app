@@ -11,9 +11,10 @@ const NavigationButton = ({ content, bookmarkName, iconSrc, iconAlt }) => {
     setBookmark,
     setIsMarkerSelected,
     setSelectedStationID,
-    setSelectedPollutants,
+    setSelectedPollutant,
     setIsRaportActive,
     setIsSidebarOpen,
+    setIsLoading,
   } = useMainContext();
 
   const router = useRouter();
@@ -34,9 +35,10 @@ const NavigationButton = ({ content, bookmarkName, iconSrc, iconAlt }) => {
             searchParams
           );
           setBookmark(bookmarkName);
+          setIsLoading(false);
           setIsMarkerSelected(false);
           setSelectedStationID(null);
-          setSelectedPollutants([]);
+          setSelectedPollutant('');
           setIsRaportActive(false);
           bookmarkName === 'ranking'
             ? setIsSidebarOpen(false)

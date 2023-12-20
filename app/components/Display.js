@@ -1,6 +1,5 @@
 'use client';
 import React from 'react';
-// import MapComponent from './Map/MapComponent';
 import Navigation from './Navigation/Navigation';
 import Sidebar from './Sidebar/Sidebar';
 import { useMainContext } from '../store/MainContext';

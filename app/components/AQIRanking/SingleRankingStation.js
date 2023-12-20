@@ -79,9 +79,7 @@ const SingleRankingStation = ({ entry, station }) => {
           entry.id,
           searchParams
         );
-        router.push(`${pathname}?${queryString}`, {
-          scroll: false,
-        });
+        router.push(`${pathname}?${queryString}`);
         setIsLoading(true);
         setIsMarkerSelected(true);
         setSelectedStationID(entry.id);

@@ -7,11 +7,9 @@ import SingleRankingStation from './SingleRankingStation';
 const AQIranking = ({ AQI, stations }) => {
   const { isMobileRankingOpen } = useMainContext();
 
-  const sortAQI = AQI.filter((entry) => {
-    return entry.stIndexLevel != null;
-  }).sort((a, b) => {
-    return b.stIndexLevel.id - a.stIndexLevel.id;
-  });
+  const sortedAQI = AQI.filter((entry) => entry.stIndexLevel !== null).sort(
+    (a, b) => b.stIndexLevel.id - a.stIndexLevel.id
+  );
 
   return (
     <div className={`${isMobileRankingOpen ? 'block' : 'hidden sm:block'}`}>
@@ -24,7 +22,7 @@ const AQIranking = ({ AQI, stations }) => {
       </div>
       <span className='border border-blue2 mb-2 block'></span>
       <ul>
-        {sortAQI.map((entry, index) => {
+        {sortedAQI.map((entry) => {
           const station = stations.find((s) => s.id === entry.id);
           return (
             <SingleRankingStation

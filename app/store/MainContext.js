@@ -16,7 +16,7 @@ export default function MainContextProvider({ children }) {
   const [isMarkerSelected, setIsMarkerSelected] = useState(false);
   const [selectedStationID, setSelectedStationID] = useState(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
-  const [selectedPollutants, setSelectedPollutants] = useState([]);
+  const [selectedPollutant, setSelectedPollutant] = useState([]);
   const [isRaportActive, setIsRaportActive] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobileRankingOpen, setIsMobileRankingOpen] = useState(false);
@@ -43,8 +43,8 @@ export default function MainContextProvider({ children }) {
         setSelectedStationID,
         isMapLoaded,
         setIsMapLoaded,
-        selectedPollutants,
-        setSelectedPollutants,
+        selectedPollutant,
+        setSelectedPollutant,
         isRaportActive,
         setIsRaportActive,
         isSidebarOpen,

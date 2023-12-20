@@ -5,18 +5,19 @@ import Image from 'next/image';
 import { useMainContext } from '../../store/MainContext';
 import { deleteQueryString } from '../../utils/queryString';
 import NavigationButton from './NavigationButton';
-import ClosestStationIcon from './ClosestStationIcon';
+import NearestStation from './NearestStation';
 
 const Navigation = ({ stations, AQI }) => {
   const {
+    isSidebarOpen,
     setBookmark,
     setIsMarkerSelected,
     setSelectedStationID,
-    setSelectedPollutants,
+    setSelectedPollutant,
     setIsRaportActive,
     setIsMobileRankingOpen,
     setIsSidebarOpen,
-    isSidebarOpen,
+    setIsLoading,
   } = useMainContext();
 
   const router = useRouter();
@@ -48,9 +49,10 @@ const Navigation = ({ stations, AQI }) => {
             searchParams
           );
           setBookmark('ranking');
+          setIsLoading(false);
           setIsMarkerSelected(false);
           setSelectedStationID(null);
-          setSelectedPollutants([]);
+          setSelectedPollutant('');
           setIsRaportActive(false);
           setIsSidebarOpen(true);
           setIsMobileRankingOpen(true);
@@ -66,8 +68,8 @@ const Navigation = ({ stations, AQI }) => {
         />
       </div>
 
-      {/* Find closest station icon */}
-      <ClosestStationIcon stations={stations} AQI={AQI} />
+      {/* Find nearest station icon */}
+      <NearestStation stations={stations} AQI={AQI} />
 
       {/* Favorite stations */}
       <NavigationButton

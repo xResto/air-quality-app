@@ -3,8 +3,6 @@ import 'leaflet/dist/leaflet.css';
 import { useCallback, useEffect } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useMainContext } from '../../store/MainContext';
-import { createQueryString, deleteQueryString } from '@/app/utils/queryString';
-import Image from 'next/image';
 import Loading from '../Loading';
 import AQILegend from './AQILegend';
 import MobileReturnButton from './MobileReturnButton';
@@ -16,7 +14,6 @@ import {
   useMap,
 } from 'react-leaflet';
 import L from 'leaflet';
-import { set } from 'date-fns';
 
 const getZoomLevel = () => {
   if (window.innerWidth <= 1350) {
@@ -27,24 +24,19 @@ const getZoomLevel = () => {
 };
 
 const ManageMap = () => {
-  const {
-    zoom,
-    coordinate,
-    selectedStationID,
-    findClosest,
-    setFindClosest,
-    setIsMapLoaded,
-  } = useMainContext();
+  const { zoom, coordinate, findClosest, setFindClosest, setIsMapLoaded } =
+    useMainContext();
   const map = useMap();
 
   useEffect(() => {
     map.setZoom(getZoomLevel());
+    map.getPane('mapPane').style.zIndex = 0;
+    map.zoomControl.setPosition('bottomright');
   }, []);
 
   useEffect(() => {
     map.whenReady(() => {
       setIsMapLoaded(true);
-      console.log('gotow');
     });
   }, [map, setIsMapLoaded]);
 
@@ -66,37 +58,19 @@ function MapComponent({ stations, AQI }) {
     zoom,
     userClosestStation,
     selectedStationID,
-    setCoordinate,
     setZoom,
     setBookmark,
     setIsLoading,
     setIsMarkerSelected,
     setSelectedStationID,
-    setIsMapLoaded,
-    setSelectedPollutants,
+    setSelectedPollutant,
     setIsRaportActive,
     isSidebarOpen,
     setIsSidebarOpen,
-    // map,
-    // setMap,
   } = useMainContext();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  const handleLoad = () => {
-    setIsMapLoaded(true);
-  };
-
-  const handleZoomChange = (e) => {
-    let newZoom = e.detail.zoom;
-    let currentCenter = e.detail.center;
-    setZoom(newZoom);
-    setCoordinate({
-      lat: currentCenter.lat,
-      lng: currentCenter.lng,
-    });
-  };
 
   useEffect(() => {
     if (coordinate.lat === 52.077 && coordinate.lng === 19) {
@@ -131,24 +105,16 @@ function MapComponent({ stations, AQI }) {
         setIsMarkerSelected(true);
         setSelectedStationID(stationID);
         setBookmark('station');
-        setSelectedPollutants([]);
+        setSelectedPollutant('');
         setIsRaportActive(false);
         setIsSidebarOpen(true);
 
-        deleteQueryString(
-          ['sensorID', 'dateFrom', 'dateTo'],
-          router,
-          pathname,
-          searchParams
-        );
-        const queryString = createQueryString(
-          'stationID',
-          stationID,
-          searchParams
-        );
-        router.push(`${pathname}?${queryString}`, {
-          scroll: false,
-        });
+        const params = new URLSearchParams(searchParams);
+        params.delete('sensorID');
+        params.delete('dateFrom');
+        params.delete('dateTo');
+        params.set('stationID', stationID);
+        router.push(`${pathname}?${params.toString()}`);
       } else {
         setIsLoading(false);
       }

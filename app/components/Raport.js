@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createRaportQueryString } from '../utils/queryString';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
@@ -11,20 +11,18 @@ import {
   MenuItem,
   ListItemText,
   OutlinedInput,
-  Checkbox,
-  TextField,
-  createTheme,
 } from '@mui/material';
 import styled from '@emotion/styled';
 import {
   DatePicker,
-  DesktopDatePicker,
   LocalizationProvider,
   PickersLayout,
 } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { deleteQueryString } from '../utils/queryString';
 import HistoricalDataChart from './HistoricalDataChart';
+import Loading from './Loading';
+import { set } from 'date-fns';
 
 // Select
 const StyledSelect = styled(Select)({
@@ -61,12 +59,6 @@ const MenuProps = {
     },
   },
 };
-const StyledCheckbox = styled(Checkbox)({
-  color: '#001C30',
-  '&.Mui-checked': {
-    color: '#00101c',
-  },
-});
 
 // Date Picker
 const StyledPickersLayout = styled(PickersLayout)({
@@ -80,8 +72,8 @@ const StyledPickersLayout = styled(PickersLayout)({
 
 const Raport = ({ raport, sensorIDsData, stationName }) => {
   const {
-    selectedPollutants,
-    setSelectedPollutants,
+    selectedPollutant,
+    setSelectedPollutant,
     setBookmark,
     setIsRaportActive,
     selectedDateFrom,
@@ -89,6 +81,12 @@ const Raport = ({ raport, sensorIDsData, stationName }) => {
     selectedDateTo,
     setSelectedDateTo,
   } = useMainContext();
+
+  const [isRaportLoading, setIsRaportLoading] = useState(false);
+  const [displayedSelectedPollutant, setDisplayedSelectedPollutant] =
+    useState();
+  const [inaproppriateDateRange, setInaproppriateDateRange] = useState(false);
+  const [raportErorr, setRaportError] = useState(false);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -105,12 +103,34 @@ const Raport = ({ raport, sensorIDsData, stationName }) => {
       }) + timeSuffix
     );
   };
+  useEffect(() => {
+    if (raport === 'error') {
+      setRaportError(true);
+      setIsRaportLoading(false);
+    } else if (raport.length > 0) {
+      setRaportError(false);
+      setIsRaportLoading(false);
+    }
+  }, [raport]);
+
+  useEffect(() => {
+    const dateDifference = Math.abs(
+      (selectedDateTo - selectedDateFrom) / (24 * 60 * 60 * 1000)
+    );
+
+    if (dateDifference > 40) {
+      setInaproppriateDateRange(true);
+      return;
+    }
+
+    setInaproppriateDateRange(false);
+  }, [selectedDateTo, selectedDateFrom]);
 
   const handleChange = (event) => {
     const {
       target: { value },
     } = event;
-    setSelectedPollutants(typeof value === 'string' ? value.split(',') : value);
+    setDisplayedSelectedPollutant(value);
   };
 
   const handleDateFromChange = (newDate) => {
@@ -121,20 +141,24 @@ const Raport = ({ raport, sensorIDsData, stationName }) => {
     setSelectedDateTo(newDate);
   };
 
-  const selectedSensorIDs = sensorIDsData
-    .filter((sensor) => selectedPollutants.includes(sensor.param.paramCode))
-    .map((sensor) => sensor.id);
-
   const loadRaportHandler = () => {
-    const selectedSensorIDs = sensorIDsData
-      .filter((sensor) => selectedPollutants.includes(sensor.param.paramCode))
-      .map((sensor) => sensor.id);
+    if (raport === 'error') {
+      setIsRaportLoading(false);
+    } else {
+      setIsRaportLoading(true);
+    }
+
+    const selectedSensor = sensorIDsData.find(
+      (sensor) => sensor.param.paramCode === displayedSelectedPollutant
+    );
+    const selectedSensorID = selectedSensor.id;
+    setSelectedPollutant(selectedSensor.param.paramCode);
 
     const formattedDateFrom = formatDate(selectedDateFrom);
     const formattedDateTo = formatDate(selectedDateTo, true);
 
     const queryString = createRaportQueryString(
-      selectedSensorIDs,
+      selectedSensorID,
       formattedDateFrom,
       formattedDateTo,
       searchParams
@@ -189,26 +213,19 @@ const Raport = ({ raport, sensorIDsData, stationName }) => {
 
       <div className='flex flex-col gap-4 justify-center'>
         <FormControl required>
-          <StyledInputLabel id='demo-multiple-checkbox-label'>
-            Wybierz zanieczyszczenia
+          <StyledInputLabel id='demo-simple-select-label'>
+            Wybierz zanieczyszczenie
           </StyledInputLabel>
           <StyledSelect
-            labelId='demo-multiple-checkbox-label'
-            id='demo-multiple-checkbox'
-            multiple
-            value={selectedPollutants}
+            labelId='demo-simple-select-label'
+            id='demo-simple-checkbox'
+            value={displayedSelectedPollutant}
             onChange={handleChange}
             input={<OutlinedInput label='Wybierz zanieczyszczenia' />}
-            renderValue={(selected) => selected.join(', ')}
             MenuProps={MenuProps}
           >
             {sensorIDsData.map((sensor) => (
               <StyledMenuItem key={sensor.id} value={sensor.param.paramCode}>
-                <StyledCheckbox
-                  checked={
-                    selectedPollutants.indexOf(sensor.param.paramCode) > -1
-                  }
-                />
                 <ListItemText primary={sensor.param.paramCode} />
               </StyledMenuItem>
             ))}
@@ -224,15 +241,10 @@ const Raport = ({ raport, sensorIDsData, stationName }) => {
             }}
             sx={{
               '& .MuiOutlinedInput-root': {
-                // backgroundColor: '#001C30',
-                // color: 'white',
                 '& fieldset': {
                   borderColor: '#38A3A5', // Default border color
                   borderWidth: '2px',
                 },
-                // '&:hover fieldset': {
-                //   borderColor: '#176B87', // Border color on hover
-                // },
                 '&.Mui-focused fieldset': {
                   borderColor: '#176B87', // Border color when focused
                 },
@@ -257,15 +269,10 @@ const Raport = ({ raport, sensorIDsData, stationName }) => {
             }}
             sx={{
               '& .MuiOutlinedInput-root': {
-                // backgroundColor: '#001C30',
-                // color: 'white',
                 '& fieldset': {
                   borderColor: '#38A3A5', // Default border color
                   borderWidth: '2px',
                 },
-                // '&:hover fieldset': {
-                //   borderColor: '#176B87', // Border color on hover
-                // },
                 '&.Mui-focused fieldset': {
                   borderColor: '#176B87', // Border color when focused
                 },
@@ -283,14 +290,50 @@ const Raport = ({ raport, sensorIDsData, stationName }) => {
           />
         </LocalizationProvider>
         <button
-          className='border mt-2 border-blue2 self-center py-1 px-4 rounded-2xl text-center font-semibold text-base text-white hover:bg-blue2 transition-all'
+          className={`border mt-2 border-blue2 self-center py-1 px-4 rounded-2xl text-center font-semibold text-base text-white transition-all ${
+            !displayedSelectedPollutant ||
+            !selectedDateFrom ||
+            !selectedDateTo ||
+            inaproppriateDateRange
+              ? 'opacity-50'
+              : 'hover:bg-blue2 cursor-pointer'
+          }`}
           onClick={loadRaportHandler}
+          disabled={
+            !displayedSelectedPollutant ||
+            !selectedDateFrom ||
+            !selectedDateTo ||
+            inaproppriateDateRange
+          }
         >
-          Generuj Raport
+          Generuj raport
         </button>
-        {raport && (
-          <HistoricalDataChart raport={raport} sensorIDsData={sensorIDsData} />
-        )}
+        {raport.length > 0 &&
+          raport !== 'error' &&
+          !inaproppriateDateRange &&
+          !raportErorr &&
+          !isRaportLoading && (
+            <HistoricalDataChart
+              raport={raport}
+              sensorIDsData={sensorIDsData}
+              setIsRaportLoading={setIsRaportLoading}
+            />
+          )}
+        {raport === 'error' &&
+          !inaproppriateDateRange &&
+          raportErorr &&
+          !isRaportLoading && (
+            <p>{`Przepraszamy, nie można zwrócić danych dla ${selectedPollutant}. Zbyt wiele zapytań w jednostce czasu. Spróbuj ponownie za chwilę.`}</p>
+          )}
+        {inaproppriateDateRange &&
+          selectedDateFrom &&
+          selectedDateTo &&
+          !isRaportLoading && (
+            <div className='text-red-500 text-sm'>
+              Proszę ograniczyć wybór do maksymalnie 40 dni.
+            </div>
+          )}
+        {isRaportLoading && <Loading />}
       </div>
     </div>
   );

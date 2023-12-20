@@ -14,14 +14,15 @@ import { useMainContext } from '../store/MainContext';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 
-const HistoricalDataChart = ({ raport, sensorIDsData }) => {
+const HistoricalDataChart = ({ raport, sensorIDsData, setIsRaportLoading }) => {
   const {
-    selectedPollutants,
+    selectedPollutant,
     selectedDateFrom,
     setSelectedDateFrom,
     selectedDateTo,
     setSelectedDateTo,
   } = useMainContext();
+
   const getPollutantCode = (stationCode) => {
     const sensor = sensorIDsData.find((s) =>
       stationCode.includes(s.param.paramCode)
@@ -50,53 +51,66 @@ const HistoricalDataChart = ({ raport, sensorIDsData }) => {
       '#98046c',
     ];
 
-    const range = colorRanges[key] || [maxSensorValue + 1];
+    const range = colorRanges[key];
     const colorIndex = range.findIndex((r) => value <= r);
-    return colorPalette[colorIndex] || '#888484';
+
+    return colorPalette[colorIndex] || '#98046c';
   };
 
-  // const countAirQualityCategories = (sensorData) => {
-  //   const categories = {
-  //     veryGood: 0,
-  //     good: 0,
-  //     moderate: 0,
-  //     poor: 0,
-  //     bad: 0,
-  //     veryBad: 0,
-  //   };
+  const countAirQualityCategories = (raport, pollutantCode) => {
+    setIsRaportLoading(false);
+    const totalEntries = raport.length;
 
-  //   sensorData.forEach((entry) => {
-  //     const value = entry['Wartość'];
-  //     if (value < 20) {
-  //       categories.veryGood += 1;
-  //     } else if (value >= 20 && value < 50) {
-  //       categories.good += 1;
-  //     } else if (value >= 50 && value < 80) {
-  //       categories.moderate += 1;
-  //     } else if (value >= 80 && value < 110) {
-  //       categories.poor += 1;
-  //     } else if (value >= 110 && value < 150) {
-  //       categories.bad += 1;
-  //     } else if (value >= 150) {
-  //       categories.veryBad += 1;
-  //     }
-  //   });
+    const pollutantRanges = {
+      PM10: [20, 50, 80, 110, 150],
+      'PM2.5': [13, 35, 55, 75, 110],
+      O3: [70, 120, 150, 180, 240],
+      NO2: [40, 100, 150, 230, 400],
+      SO2: [50, 100, 200, 350, 500],
+    };
 
-  //   return categories;
-  // };
+    const categories = {
+      veryGood: { count: 0, percentage: 0 },
+      good: { count: 0, percentage: 0 },
+      moderate: { count: 0, percentage: 0 },
+      poor: { count: 0, percentage: 0 },
+      bad: { count: 0, percentage: 0 },
+      veryBad: { count: 0, percentage: 0 },
+    };
 
-  const processData = (sensorData) => {
-    if (!Array.isArray(sensorData) || sensorData.length === 0) {
+    raport.forEach((entry) => {
+      const value = entry['Wartość'];
+      const range = pollutantRanges[pollutantCode];
+      let category = range.findIndex((r) => value <= r);
+      category = category !== -1 ? category : 5;
+
+      if (category >= 0 && category < 6) {
+        const categoryName = Object.keys(categories)[category];
+        categories[categoryName].count += 1;
+      }
+    });
+
+    Object.keys(categories).forEach((category) => {
+      categories[category].percentage = (
+        (categories[category].count / totalEntries) *100
+        ).toFixed();
+    });
+
+    return categories;
+  };
+
+  const data = countAirQualityCategories(raport, selectedPollutant);
+
+  const processData = (raport) => {
+    if (!raport) {
       return null;
     }
 
-    const stationCode = sensorData[0]['Kod stanowiska'];
+    const stationCode = raport[0]['Kod stanowiska'];
     const pollutantCode = getPollutantCode(stationCode);
 
-    const maxSensorValue = Math.max(
-      ...sensorData.map((entry) => entry['Wartość'])
-    );
-    const backgroundColor = sensorData.map((entry) =>
+    const maxSensorValue = Math.max(raport.map((entry) => entry['Wartość']));
+    const backgroundColor = raport.map((entry) =>
       determineColor(entry['Wartość'], pollutantCode, maxSensorValue)
     );
 
@@ -121,11 +135,11 @@ const HistoricalDataChart = ({ raport, sensorIDsData }) => {
     const toDateString = formatDateForComparison(selectedDateTo, true);
 
     const chartData = {
-      labels: sensorData.map((entry) => entry.Data),
+      labels: raport.map((entry) => entry.Data),
       datasets: [
         {
           label: pollutantCode,
-          data: sensorData.map((entry) => entry['Wartość']),
+          data: raport.map((entry) => entry['Wartość']),
           backgroundColor: backgroundColor,
         },
       ],
@@ -138,60 +152,66 @@ const HistoricalDataChart = ({ raport, sensorIDsData }) => {
     return chartData;
   };
 
+  const chartData = processData(raport);
+
   return (
     <div>
-      {raport.map((sensorData, index) => {
-        const data = processData(sensorData);
-        const pollutantName = selectedPollutants[index] || 'Unknown pollutant';
-
-        if (!data) {
-          // If there is no data, display the pollutant name with the error message
-          return (
-            <div key={index}>
-              <p>{`Przepraszamy, nie można zwrócić danych dla ${pollutantName}. Zbyt wiele zapytań w jednostce czasu.`}</p>
-            </div>
-          );
-        }
-        return (
-          <div key={index}>
-            <Bar
-              data={data}
-              options={{
-                responsive: true,
-                scales: {
-                  x: {
-                    display: false,
-                  },
-                  y: {
-                    beginAtZero: true,
-                  },
-                },
-                plugins: {
-                  legend: {
-                    display: true,
-                  },
-                  title: {
-                    display: true,
-                    text: data.datasets[0].label,
-                  },
-                },
-              }}
-            />
-            <div className='flex justify-between text-xs mb-4'>
-              <p>{data.formattedDates.latestDate}</p>
-              <p>{data.formattedDates.oldestDate}</p>
-            </div>
-            {/* <ul>
-              <li>Bardzo dobra: {data.airQualityCounts.veryGood}</li>
-              <li>Dobra: {data.airQualityCounts.good}</li>
-              <li>Umiarkowana: {data.airQualityCounts.moderate}</li>
-              <li>Niezadowalająca: {data.airQualityCounts.poor}</li>
-              <li>Zła: {data.airQualityCounts.bad}</li>
-              <li>Bardzo zła: {data.airQualityCounts.veryBad}</li>
-            </ul> */}
-          </div>
-        );
-      })}
+      <Bar
+        data={chartData}
+        options={{
+          responsive: true,
+          scales: {
+            x: {
+              display: false,
+            },
+            y: {
+              beginAtZero: true,
+            },
+          },
+          plugins: {
+            legend: {
+              display: true,
+            },
+            title: {
+              display: true,
+              text: chartData.datasets[0].label,
+            },
+          },
+        }}
+      />
+      <div className='flex justify-between text-xs mb-4'>
+        <p>{chartData.formattedDates.latestDate}</p>
+        <p>{chartData.formattedDates.oldestDate}</p>
+      </div>
+      {chartData.datasets[0].label !== 'C6H6' &&
+        chartData.datasets[0].label !== 'CO' && (
+          <ul className='flex flex-col justify-start items-start text-center'>
+            <li>
+              <span className='text-[#108404]'>Bardzo dobra:</span>{' '}
+              {data.veryGood.count} ({data.veryGood.percentage}%)
+            </li>
+            <li>
+              <span className='text-[#18cc04]'>Dobra:</span> {data.good.count} (
+              {data.good.percentage}%)
+            </li>
+            <li>
+              <span className='text-[#f4f804]'>Umiarkowana:</span>{' '}
+              {data.moderate.count} ({data.moderate.percentage}%)
+            </li>
+            <li>
+              <span className='text-[#ff7c04]'>Niezadowalająca:</span>{' '}
+              {data.poor.count} ({data.poor.percentage}%)
+            </li>
+            <li>
+              <span className='text-[#e00404]'>Zła:</span> {data.bad.count} (
+              {data.bad.percentage}%)
+            </li>
+            <li>
+              <span className='text-[#98046c]'>Bardzo zła:</span>{' '}
+              {data.veryBad.count} ({data.veryBad.percentage}%)
+            </li>
+          </ul>
+        )}
     </div>
   );
 };

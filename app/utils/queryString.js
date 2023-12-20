@@ -11,18 +11,19 @@ export const deleteQueryString = (
   pathname,
   searchParams
 ) => {
+  console.log('Deleting Query String:', namesToDelete);
   const params = new URLSearchParams(searchParams);
 
   namesToDelete.forEach((name) => {
     params.delete(name);
   });
+  console.log('Updated Params:', params.toString());
 
-  const path = typeof pathname === 'function' ? pathname() : pathname;
-  router.replace(`${path}?${params.toString()}`, undefined, { shallow: true });
+  router.replace(`${pathname}?${params.toString()}`);
 };
 
 export const createRaportQueryString = (
-  sensorIDs,
+  sensorID,
   dateFrom,
   dateTo,
   existingSearchParams
@@ -31,16 +32,14 @@ export const createRaportQueryString = (
 
   params.delete('sensorID');
 
-  if (sensorIDs.length > 0) {
-    const sensorIDString = sensorIDs.join(',');
-    params.set('sensorID', sensorIDString);
-  } else {
-    params.set('sensorID', sensorIDs);
+  if (sensorID) {
+    params.set('sensorID', sensorID);
   }
 
   if (dateFrom) {
     params.set('dateFrom', dateFrom);
   }
+
   if (dateTo) {
     params.set('dateTo', dateTo);
   }

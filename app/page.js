@@ -14,8 +14,6 @@ export default async function Page({ searchParams }) {
   const { stations, stationsID } = await getAllStations();
   const AQI = await getAqiData(stationsID);
 
-  // console.log(stations, stationsID);
-
   // Sidebar
   const clickedStationID = searchParams?.stationID ?? '';
 
