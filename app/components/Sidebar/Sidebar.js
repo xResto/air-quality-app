@@ -10,7 +10,7 @@ import AQIranking from '../AQIRanking/AQIranking';
 import Loading from '../Loading';
 import FavoriteStations from '../FavoriteStations/FavoriteStations';
 import Skeleton from '../Skeleton';
-import Raport from '../Raport';
+// import Raport from '../Raport';
 import WindComponent from './WeatherComponent';
 import CloseButtonMobile from './CloseButtonMobile';
 import Credits from '../Credits';
@@ -24,7 +24,7 @@ const Sidebar = ({
   stations,
   thisStation,
   weatherData,
-  raport,
+  // raport,
 }) => {
   const [AQItxt, setAQItxt] = useState('');
   const [airImage, setAirImage] = useState('');
@@ -301,7 +301,7 @@ const Sidebar = ({
         </section>
         <span className='border border-blue2 mt-1 mb-2'></span>
         <WindComponent weatherData={weatherData} />
-        <button
+        {/* <button
           className='border mt-2 border-blue2 self-center py-1 px-4 rounded-2xl text-center font-semibold text-base text-white hover:bg-blue2 transition-all'
           onClick={() => {
             setBookmark('raport');
@@ -309,7 +309,7 @@ const Sidebar = ({
           }}
         >
           Generuj raport zanieczyszczeń
-        </button>
+        </button> */}
         <ChartComponent sensorData={sensorData} />
       </>
     );
@@ -339,13 +339,13 @@ const Sidebar = ({
           )}
           {bookmark === 'info' && !isLoading && <Info />}
           {bookmark === 'credits' && !isLoading && <Credits />}
-          {bookmark === 'raport' && !isLoading && (
+          {/* {bookmark === 'raport' && !isLoading && (
             <Raport
               raport={raport}
               sensorIDsData={sensorIDsData}
               stationName={thisStation.stationName}
             />
-          )}
+          )} */}
           {!isLoading && bookmark === 'station' && sensorData && (
             <>
               <CloseButtonMobile />

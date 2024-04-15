@@ -39,7 +39,7 @@ const Credits = () => {
           &nbsp;on Freepik
         </li>
         <li>
-          "Umiarkwana {helperTxt}"&nbsp;
+          "Umiarkowana {helperTxt}"&nbsp;
           <Link
             href='https://www.freepik.com/free-vector/sao-paulo-concept-illustration_13717686.htm'
             target='_blank'

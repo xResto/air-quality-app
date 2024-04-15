@@ -14,6 +14,7 @@ import {
   useMap,
 } from 'react-leaflet';
 import L from 'leaflet';
+import CityTooltip from './CityTooltip';
 
 const getZoomLevel = () => {
   if (window.innerWidth <= 1350) {
@@ -163,20 +164,22 @@ function MapComponent({ stations, AQI }) {
                 : '';
 
             return (
-              <Marker
-                position={[+station.gegrLat, +station.gegrLon]}
-                icon={
-                  new L.Icon({
-                    iconUrl: iconUrl,
-                    className: markerStyles,
-                  })
-                }
-                zIndexOffset={zIndex}
-                eventHandlers={{
-                  click: () => handleMarkerClick(station.id),
-                }}
-                key={station.id}
-              />
+              <CityTooltip content={station.name}>
+                <Marker
+                  position={[+station.gegrLat, +station.gegrLon]}
+                  icon={
+                    new L.Icon({
+                      iconUrl: iconUrl,
+                      className: markerStyles,
+                    })
+                  }
+                  zIndexOffset={zIndex}
+                  eventHandlers={{
+                    click: () => handleMarkerClick(station.id),
+                  }}
+                  key={station.id}
+                />
+              </CityTooltip>
             );
           })}
 

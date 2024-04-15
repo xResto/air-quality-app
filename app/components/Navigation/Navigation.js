@@ -36,6 +36,7 @@ const Navigation = ({ stations, AQI }) => {
         bookmarkName='ranking'
         iconSrc='rank.svg'
         iconAlt='Ikonka podium'
+        priority={true}
       />
 
       {/* Mobile ranking icon */}
@@ -63,7 +64,7 @@ const Navigation = ({ stations, AQI }) => {
           alt='Ikonka podium'
           width={50}
           height={50}
-          onMouseOver={() => {}}
+          priority={true}
           className='w-auto h-auto'
         />
       </div>

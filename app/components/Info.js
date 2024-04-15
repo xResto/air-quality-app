@@ -13,18 +13,14 @@ const Info = () => {
         <div className='h-8 w-8 sm:hidden'></div>
       </div>
       <span className='border border-blue2 mb-2 block'></span>
-      <Image
-        src='/info1.jpg'
-        width={500}
-        height={500}
-        alt='Tabela prezentująca zakresy poszczególnych progów indeksu jakości powietrza dla PM10, PM2.5, O3, NO2, SO2'
-      />
-      <Image
-        src='/info2.jpg'
-        width={500}
-        height={500}
-        alt='Tabela prezentująca zakresy poszczególnych progów indeksu jakości powietrza dla C6H6 i C0'
-      />
+      <div className='flex justify-center'>
+        <Image
+          src='/info1.jpg'
+          width={500}
+          height={500}
+          alt='Tabela prezentująca zakresy poszczególnych progów indeksu jakości powietrza dla PM10, PM2.5, O3, NO2, SO2'
+        />
+      </div>
     </>
   );
 };
