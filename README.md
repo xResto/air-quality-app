@@ -2,6 +2,14 @@
 
 [View Demo](https://airqualityapp.vercel.app)
 
+Table of Contents
+1. [About The Project](#about-the-project)
+2. [Getting Started](#getting-started)
+   - [Prerequsities](#prerequsities)
+   - [Installation](#installation)
+
+# About The Project
+
 The application communicates with the Chief Inspectorate For Environmental Protection API to display data on air quality in Poland. It features a map of monitoring stations, current measurements and weather data, along with a history of pollution values from three days ago. Additionally, it includes a function to find the nearest station, a list of favorite stations, and a feature to locate the selected station on a map.
 The technologies used include Next.js, Tailwind CSS, Leaflet and Chart.js
 
