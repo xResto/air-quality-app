@@ -1,11 +1,40 @@
 # AirQualityApp
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<div align="center">[View Demo](https://airqualityapp.vercel.app)</div>
+
+The application communicates with the Chief Inspectorate For Environmental Protection API to display data on air quality in Poland. It features a map of monitoring stations, current measurements and weather data, along with a history of pollution values from three days ago. Additionally, it includes a function to find the nearest station, a list of favorite stations, and a feature to locate the selected station on a map.
+The technologies used include Next.js, Tailwind CSS, Leaflet and Chart.js
+
+### Usage
+
 
 ## Getting Started
 
-First, run the development server:
+### Prerequsities
 
+* Node.js installed on your machine.
+
+### Installation
+1. Clone the repository:
+```bash
+git clone https://github.com/xresto/air-quality-app.git
+```
+
+2. Navigate to the project directory:
+```bash
+air-quality-app
+```
+
+4. Install the dependencies:
+```bash
+npm install
+# or
+yarn
+# or
+pnpm install
+```
+
+4. Run the development server:
 ```bash
 npm run dev
 # or
@@ -14,4 +43,4 @@ yarn dev
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open your browser and visit http://localhost:3000 to view the application.
